@@ -1,0 +1,93 @@
+import http from 'node:http';
+import engine from './dist/simulation.cjs';
+import evaluation from './dist/simulationEvaluation.cjs';
+
+const object = value => value !== null && typeof value === 'object' && !Array.isArray(value);
+const shortString = value => typeof value === 'string' && value.length > 0 && value.length <= 200;
+const invalid = message => Object.assign(new Error(message), { status: 400 });
+function purchase(value) {
+  if (!object(value) || !object(value.task) || !shortString(value.task.id) || !['standard', 'urgent'].includes(value.task.family) ||
+      !['quantity', 'deadline', 'minQuality', 'tolerance', 'absoluteTolerance'].every(key => typeof value.task[key] === 'number') ||
+      !shortString(value.selected) || !Array.isArray(value.suppliers) || value.suppliers.length > 100 ||
+      !value.suppliers.every(s => object(s) && shortString(s.id) && shortString(s.name) && typeof s.eligible === 'boolean' &&
+        ['price', 'days', 'quality', 'version'].every(key => typeof s[key] === 'number'))) throw invalid('Invalid task or supplier records. Supply complete numeric fields and at most 100 offers.');
+  return value;
+}
+function approval(value) {
+  if (!object(value) || !object(value.scope) || !shortString(value.id) || !shortString(value.agent) ||
+      !['from', 'to'].every(key => Number.isSafeInteger(value[key])) ||
+      !['approved', 'effective'].every(key => typeof value[key] === 'boolean') ||
+      !['tool', 'resource', 'destination', 'taskFamily'].every(key => shortString(value.scope[key]))) throw invalid('Invalid scoped approval.');
+  return value;
+}
+function controls(value = {}) {
+  if (!object(value) || Object.keys(value).some(key => !['autoHold', 'reviewAt', 'coldStart', 'credentialMatch', 'toolVersion', 'useChangeReference'].includes(key)) ||
+      ['autoHold', 'coldStart', 'credentialMatch', 'useChangeReference'].some(key => value[key] !== undefined && typeof value[key] !== 'boolean') ||
+      (value.reviewAt !== undefined && (!Number.isFinite(value.reviewAt) || value.reviewAt < 0 || value.reviewAt > 100)) ||
+      (value.toolVersion !== undefined && ![1, 2].includes(value.toolVersion))) throw invalid('Invalid simulation controls. Behavioral references and thresholds are computed by the server.');
+  return value;
+}
+function samples(envelope, destination, options, input) {
+  const runs = Array.from({ length: 4 }, () => engine.runChange(envelope, destination, options, input));
+  return { runs, ...engine.learnChangeReference(envelope, runs) };
+}
+export function dispatch(path, body) {
+  if (!object(body)) throw invalid('Request must be a JSON object.');
+  if (path === '/api/evaluation') return evaluation.evaluateSynthetic();
+  const input = purchase(body.input);
+  const raw = controls(body.options);
+  const options = { autoHold: raw.autoHold ?? true, reviewAt: raw.reviewAt ?? 40 };
+  if (path === '/api/outcome') {
+    const history = body.previousLosses ?? [];
+    if (!Array.isArray(history) || history.length > 256 || history.some(n => n !== null && (!Number.isFinite(n) || n < 0))) throw invalid('Decision history must contain at most 256 nonnegative losses.');
+    return engine.runOutcome(input, history, { ...options, credentialMatch: raw.credentialMatch ?? true, toolVersion: raw.toolVersion ?? 1, ...(raw.coldStart ? { reference: null } : {}) });
+  }
+  if (path === '/api/change' || path === '/api/reference') {
+    const envelope = approval(body.envelope);
+    if (!shortString(body.destination)) throw invalid('Supply the actual scheduling destination.');
+    if (path === '/api/reference') return samples(envelope, body.destination, options, input);
+    const reference = raw.useChangeReference ? samples(envelope, body.destination, options, input).reference : null;
+    return engine.runChange(envelope, body.destination, { ...options, changeReference: reference }, input);
+  }
+  if (path === '/api/recovery') {
+    if (!['poisoned', 'trusted'].includes(body.branch) || typeof body.missingLineage !== 'boolean' || typeof body.repair !== 'boolean') throw invalid('Supply a supported source, provenance status and repair choice.');
+    return engine.runRecovery(body.branch, body.missingLineage, body.repair, options, input);
+  }
+  throw Object.assign(new Error('Unknown API endpoint.'), { status: 404 });
+}
+function readJSON(req) {
+  return new Promise((resolve, reject) => {
+    let size = 0; const chunks = [];
+    req.on('data', chunk => {
+      size += chunk.length;
+      if (size > 131072) { reject(Object.assign(new Error('Request exceeds 128 KiB.'), { status: 413 })); return; }
+      chunks.push(chunk);
+    });
+    req.on('end', () => {
+      try { resolve(JSON.parse(Buffer.concat(chunks).toString('utf8'))); }
+      catch { reject(invalid('Malformed JSON.')); }
+    });
+    req.on('error', reject);
+  });
+}
+export function createServer() {
+  return http.createServer({ requestTimeout: 15000, headersTimeout: 10000, maxHeaderSize: 16384 }, async (req, res) => {
+    const send = (status, value) => {
+      res.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff', ...(status === 413 ? { Connection: 'close' } : {}) });
+      res.end(JSON.stringify(value));
+    };
+    try {
+      const path = new URL(req.url, 'http://localhost').pathname;
+      if (req.method === 'GET' && ['/health', '/api/health'].includes(path)) return send(200, { status: 'ok', service: 'driftveil-api', engine: engine.ENGINE_VERSION, synthetic: true, usps: engine.PROOF_NAMES });
+      if (!['/api/outcome', '/api/change', '/api/reference', '/api/recovery', '/api/evaluation'].includes(path)) return send(404, { error: 'Unknown API endpoint.' });
+      if (req.method !== 'POST') return send(405, { error: 'Use POST with a JSON request.' });
+      if (!req.headers['content-type']?.startsWith('application/json')) return send(415, { error: 'Use Content-Type: application/json.' });
+      const result = dispatch(path, await readJSON(req));
+      if (result.engine && result.id) result.execution = 'api';
+      for (const run of result.runs ?? []) run.execution = 'api';
+      send(200, result);
+    } catch (error) {
+      send(error.status ?? 500, { error: error.status ? error.message : 'The simulation could not complete. No result was recorded.' });
+    }
+  });
+}

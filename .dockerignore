@@ -1,0 +1,13 @@
+node_modules
+.git
+.env
+.env.*
+.vercel
+.browser-test
+dist
+server/dist
+artifacts
+archive
+*.log
+*.tsbuildinfo
+.DS_Store
