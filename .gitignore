@@ -1,0 +1,13 @@
+node_modules
+dist
+.vite
+*.log
+.DS_Store
+.env
+.env.*
+.browser-test/
+*.tsbuildinfo
+.vercel/
+server/dist/
+artifacts/*
+!artifacts/synthetic-evaluation.json
