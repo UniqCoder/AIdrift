@@ -1,8 +1,8 @@
 {
-  "engine": "driftveil-synthetic-2.1",
+  "engine": "driftveil-synthetic-2.2",
   "seed": 422026,
-  "generatedAt": "2026-10-23T17:11:07.728Z",
-  "durationMs": 5.011000000000024,
+  "generatedAt": "2026-10-24T17:03:56.284Z",
+  "durationMs": 20.911299999999983,
   "reference": {
     "id": "benign-standard-v1/train",
     "agent": "procurement-agent",
@@ -452,5 +452,90 @@
     "duplicatePrevented": true,
     "unresolvedHeld": true
   },
-  "failures": []
+  "failures": [],
+  "comparisons": {
+    "outcome": [
+      {
+        "method": "Tool allowlist only",
+        "hardChoiceHeld": false,
+        "driftAlertWindow": null,
+        "stableAlertWindow": null
+      },
+      {
+        "method": "Task rules only",
+        "hardChoiceHeld": true,
+        "driftAlertWindow": null,
+        "stableAlertWindow": null
+      },
+      {
+        "method": "Task rules + learned history",
+        "hardChoiceHeld": true,
+        "driftAlertWindow": 4,
+        "stableAlertWindow": null
+      }
+    ],
+    "change": [
+      {
+        "method": "Frozen contract",
+        "schedulingAllowed": false,
+        "unrelatedExportHeld": true
+      },
+      {
+        "method": "DriftGate scoped approval",
+        "schedulingAllowed": true,
+        "unrelatedExportHeld": true
+      }
+    ],
+    "recovery": [
+      {
+        "method": "Dependency holds only",
+        "affectedPaymentHeld": true,
+        "independentCompleted": true,
+        "repairedPaymentCompleted": false
+      },
+      {
+        "method": "ChainRestore verified repair",
+        "affectedPaymentHeld": true,
+        "independentCompleted": true,
+        "repairedPaymentCompleted": true
+      }
+    ],
+    "scope": "Controlled local baseline policies on one hard-loss choice, matched eight-window 3% loss/zero-loss streams, one mixed change and one recovery fixture. Not a full ablation study or product comparison."
+  },
+  "graphWorkloads": [
+    {
+      "nodes": 100,
+      "edges": 98,
+      "samples": 5,
+      "p50Ms": 0.07900000000000773,
+      "p95Ms": 0.10410000000001673,
+      "affected": 63,
+      "expectedAffected": 63,
+      "unresolved": 0,
+      "correct": true
+    },
+    {
+      "nodes": 500,
+      "edges": 498,
+      "samples": 5,
+      "p50Ms": 0.5749999999999886,
+      "p95Ms": 0.5866000000000327,
+      "affected": 255,
+      "expectedAffected": 255,
+      "unresolved": 0,
+      "correct": true
+    },
+    {
+      "nodes": 1000,
+      "edges": 998,
+      "samples": 5,
+      "p50Ms": 1.770399999999995,
+      "p95Ms": 2.084100000000035,
+      "affected": 511,
+      "expectedAffected": 511,
+      "unresolved": 0,
+      "correct": true
+    }
+  ],
+  "environment": "Node.js/24; hardware not recorded"
 }

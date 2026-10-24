@@ -39,6 +39,10 @@ async function main() {
     await evaluate(`(() => { const a = [...document.querySelectorAll('a')].find(a => a.textContent.trim() === ${JSON.stringify(text)}); if (!a) throw Error('Missing link: ' + ${JSON.stringify(text)}); a.click(); })()`);
     await pause(150);
   };
+  const disclosure = async (text, open = true) => {
+    await evaluate(`(() => { const s = [...document.querySelectorAll('summary')].find(s => s.textContent.trim() === ${JSON.stringify(text)}); if (!s) throw Error('Missing disclosure: ' + ${JSON.stringify(text)}); if (s.parentElement.open !== ${open}) s.click(); })()`);
+    await pause(100);
+  };
   const state = () => evaluate("JSON.parse(localStorage.getItem('driftveil-demo-v2')).state");
   const run = async (button, count) => { await click(button); await waitFor(`JSON.parse(localStorage.getItem('driftveil-demo-v2'))?.state.proofRuns.length === ${count}`); return (await state()).proofRuns[0]; };
   const navigate = async path => { await send('Page.navigate', { url: base + path }); await pause(400); await waitFor("document.querySelector('main h1') !== null"); };
@@ -46,15 +50,24 @@ async function main() {
     await send('Runtime.enable'); await send('Page.enable');
     await send('Emulation.setDeviceMetricsOverride', { width: 1600, height: 1100, deviceScaleFactor: 1, mobile: false });
     await navigate('/');
-    await waitFor("location.pathname === '/demo'");
+    await waitFor("location.pathname === '/operations'");
+    await navigate('/demo');
     await evaluate("localStorage.removeItem('driftveil-demo-v2')");
     await send('Page.reload'); await pause(500);
     await waitFor("document.body.innerText.includes('Give the agent a clear business task')");
+    assert.equal(await evaluate("[...document.querySelectorAll('main input[type=number]')].filter(el => el.checkVisibility()).length"), 2, 'Only quantity and deadline should be expanded by default');
+    assert.ok(await evaluate("[...document.querySelectorAll('a')].find(a => a.textContent.trim() === 'Run the purchase').getBoundingClientRect().bottom <= innerHeight"), 'The first action should fit in the desktop viewport');
+    await disclosure('Quality & cost limits');
+    assert.equal(await evaluate("[...document.querySelectorAll('main input[type=number]')].filter(el => el.checkVisibility()).length"), 4);
     await follow('Run the purchase');
-    await run('Evaluate & execute purchase', 1);
+    assert.ok(await evaluate("!document.querySelector('[aria-label=\"Beacon Supply unit price in paise\"]').checkVisibility()"), 'Offer editor should start collapsed');
+    await disclosure('Edit supplier offers');
+    assert.ok(await evaluate("document.querySelector('[aria-label=\"Beacon Supply unit price in paise\"]').checkVisibility()"));
+    await disclosure('Edit supplier offers', false);
+    await run('Run purchase', 1);
     assert.equal((await state()).proofRuns[0].effects.at(-1).status, 'committed');
     await evaluate(`(() => { const select = [...document.querySelectorAll('label')].find(l => l.textContent.includes("Agent's proposed supplier")).querySelector('select'); select.value = 'beacon'; select.dispatchEvent(new Event('change', { bubbles: true })); })()`);
-    await run('Evaluate & execute purchase', 2);
+    await run('Run purchase', 2);
     assert.equal((await state()).proofRuns[0].effects.at(-1).status, 'held');
     await follow('Investigate the finding');
     await click('Record evidence review');
@@ -66,6 +79,8 @@ async function main() {
     await checkbox('Approve payment scheduling');
     journey = await run('Check scheduling & bank export', 4);
     assert.deepEqual(journey.effects.map(e => e.status), ['committed', 'held']);
+    await disclosure('Review approval scope');
+    await disclosure('Advanced: validate a new baseline');
     await click('Collect & validate scheduling reference');
     await waitFor("JSON.parse(localStorage.getItem('driftveil-demo-v2')).state.demo.changeReference !== null");
     assert.equal((await state()).proofRuns.length, 8);
@@ -76,10 +91,12 @@ async function main() {
     assert.equal(journey.effects.find(e => e.actionId === 'independent').status, 'committed');
     assert.equal(journey.effects.find(e => e.actionId === 'payment-repaired').status, 'committed');
     assert.equal(journey.effects.at(-1).status, 'duplicate');
+    await disclosure('Source & recovery tests');
     await checkbox('Finance memory has incomplete provenance');
     journey = await run('Rebuild & verify recovery', 11);
     assert.equal(journey.effects.some(e => e.actionId === 'payment-repaired'), false);
     await follow('Review & export the evidence');
+    await disclosure('Optional: run the synthetic evaluation');
     await click('Run evaluation checks');
     await evaluate("window.__createObjectURL = URL.createObjectURL; URL.createObjectURL = blob => { window.__evidenceBlob = blob; return window.__createObjectURL(blob); }");
     await click('Export this workflow evidence');
@@ -88,7 +105,7 @@ async function main() {
     assert.equal(exported.completedChecks.every(Boolean), true);
     assert.equal(exported.workflowId, (await state()).demo.id);
     await navigate('/reports');
-    await waitFor("document.body.innerText.includes('Only actions you executed appear here')");
+    await waitFor("document.body.innerText.includes('Your saved runs, decisions and evidence in one place')");
     await navigate('/activity');
     assert.ok(await evaluate("!document.body.innerText.includes('Seeded history')"));
     await navigate('/demo?step=5');
@@ -96,12 +113,21 @@ async function main() {
     for (let step = 0; step < 6; step++) {
       await navigate('/demo?step=' + step);
       assert.ok(await evaluate('document.documentElement.scrollWidth <= innerWidth + 1'), 'Guided mobile step ' + step + ' must not overflow');
+      assert.ok(await evaluate("document.querySelector('[aria-label=\"Workflow step\"]').checkVisibility()"), 'Mobile navigation should use a compact step selector');
     }
+    await evaluate("(() => { const select = document.querySelector('[aria-label=\"Workflow step\"]'); select.value = '0'; select.dispatchEvent(new Event('change', { bubbles: true })); })()");
+    await waitFor("location.search.includes('step=0')");
     await send('Emulation.setDeviceMetricsOverride', { width: 1600, height: 1100, deviceScaleFactor: 1, mobile: false });
     await navigate('/demo?step=5');
     await click('Start another case');
     assert.equal((await state()).proofRuns.length, 11);
     assert.notEqual((await state()).demo.id, exported.workflowId);
+    await follow('Run the purchase');
+    await disclosure('Advanced security checks');
+    await checkbox('Valid token used without');
+    await waitFor("document.body.innerText.includes('A custom security check is active')");
+    const mismatch = await run('Run purchase', 12);
+    assert.equal(mismatch.effects.at(-1).status, 'held');
     process.stdout.write('PASS guided task, investigation, scoped approval, reference promotion, recovery, evidence export and non-destructive new case\n');
 
     await navigate('/lab');

@@ -30,13 +30,14 @@ export interface NavItem {
 }
 
 export const NAV: { group: string; items: NavItem[] }[] = [
-  { group: "Your workflow", items: [
-    { to: "/demo", label: "Guided workflow", icon: Play },
-    { to: "/activity", label: "Executed activity", icon: Activity },
-    { to: "/incidents", label: "Findings & investigation", icon: ShieldAlert },
-    { to: "/reports", label: "Evidence & reports", icon: FileBarChart },
+  { group: "Operations", items: [
+    { to: "/operations", label: "Security operations", icon: LayoutDashboard },
+    { to: "/activity", label: "Activity", icon: Activity },
+    { to: "/incidents", label: "Findings", icon: ShieldAlert },
+    { to: "/reports", label: "Reports", icon: FileBarChart },
   ] },
   { group: "Explore & configure", items: [
+    { to: "/demo", label: "Task workspace", icon: Play },
     { to: "/lab", label: "Advanced lab", icon: FlaskConical },
     { to: "/settings", label: "Settings", icon: Settings },
   ] },

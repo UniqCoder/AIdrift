@@ -23,7 +23,7 @@ async function post<T>(path: string, body: unknown): Promise<T> {
 export const simulationClient = {
   async outcome(...args: Parameters<typeof runOutcome>): Promise<ProofRun> {
     const [input, previousLosses = [], options = {}] = args;
-    return base ? post("outcome", { input, previousLosses, options: { autoHold: options.autoHold, reviewAt: options.reviewAt, credentialMatch: options.credentialMatch, toolVersion: options.toolVersion, coldStart: options.reference === null } }) : runOutcome(...args);
+    return base ? post("outcome", { input, previousLosses, options: { autoHold: options.autoHold, reviewAt: options.reviewAt, credentialMatch: options.credentialMatch, toolVersion: options.toolVersion, documentAttack: options.documentAttack, coldStart: options.reference === null } }) : runOutcome(...args);
   },
   async change(...args: Parameters<typeof runChange>): Promise<ProofRun> {
     const [envelope, destination = "finance.internal", options = {}, input = { ...outcomeFixture(), selected: "atlas" }] = args;

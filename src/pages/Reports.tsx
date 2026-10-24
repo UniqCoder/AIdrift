@@ -29,8 +29,8 @@ export default function Reports() {
   const generated = fmtDateTime(Date.now());
 
   if (kind === "computed") return <div className="space-y-5">
-    <PageHeader title="Evidence & reports" description="Only actions you executed appear here. Each saved run retains its own task, authority, source versions and effects." actions={<Button disabled={!proofRuns.length} onClick={() => downloadFile("driftveil-computed-report.json", JSON.stringify({ generatedAt: new Date().toISOString(), synthetic: true, evidenceType: "computed", runs: proofRuns, incidents: incidents.filter(i => i.computed), evaluation }, null, 2))}><FileJson />Export computed evidence</Button>} />
-    <ProofSummary />
+    <PageHeader title="Evidence & reports" description="Your saved runs, decisions and evidence in one place." actions={<Button variant="primary" disabled={!proofRuns.length} onClick={() => downloadFile("driftveil-computed-report.json", JSON.stringify({ generatedAt: new Date().toISOString(), synthetic: true, evidenceType: "computed", runs: proofRuns, incidents: incidents.filter(i => i.computed), evaluation }, null, 2))}><FileJson />Export computed evidence</Button>} />
+    <details className="text-sm"><summary className="cursor-pointer text-muted">Results by feature</summary><div className="mt-4"><ProofSummary /></div></details>
     <Panel className="divide-y divide-border">{proofRuns.length ? proofRuns.map(run => <div key={run.id} className="flex flex-wrap items-center justify-between gap-3 p-4"><div className="min-w-0"><p className="text-sm font-medium">{run.summary}</p><p className="mt-1 text-xs text-muted">{fmtDateTime(run.at)} · {run.engine} · {run.workflowId ? `case ${run.workflowId.slice(0, 8)}` : "advanced lab"}</p></div><div className="flex flex-wrap gap-2"><Link className={buttonVariants({ size: "sm" })} to={`/lab?tab=${run.kind}&run=${run.id}`}>Inspect snapshot</Link>{incidents.some(i => i.id === `DV-${run.id.slice(0, 8)}`) && <Link className={buttonVariants({ size: "sm" })} to={`/reports?incident=DV-${run.id.slice(0, 8)}`}>Incident report</Link>}</div></div>) : <div className="space-y-3 p-6"><p className="text-sm text-muted">No computed evidence yet. Run a task to generate an inspectable report.</p><Link className={buttonVariants({ variant: "primary" })} to="/demo">Start the guided workflow</Link></div>}</Panel>
     <p className="text-xs text-muted">Synthetic evidence from local mock execution. Run ledgers are separate sandboxes. No production effectiveness or compliance certification is established. <Link className="text-accent hover:underline" to="/demo?step=5">Return to workflow completion</Link></p>
     <details className="text-xs text-muted"><summary className="cursor-pointer">Illustrative reporting layout</summary><Link className="mt-3 inline-block text-accent hover:underline" to="/reports?type=compliance">Open fixture fleet report</Link></details>
@@ -55,7 +55,7 @@ export default function Reports() {
 
   return (
     <div>
-      <ProofSummary />
+      <details className="mb-5 text-sm"><summary className="cursor-pointer text-muted">Results by feature</summary><div className="mt-4"><ProofSummary /></div></details>
       <div className="no-print">
         <PageHeader
           title="Reports"

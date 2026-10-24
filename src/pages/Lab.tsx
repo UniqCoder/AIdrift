@@ -62,8 +62,8 @@ export default function SimulationLab() {
   const setTab = (value: string) => { setLastRun(null); setParams({ tab: value }); };
 
   return <div className="space-y-5" aria-busy={busy}>
-    {busy && <p role="status" className="sticky top-16 z-30 rounded-lg border border-accent/30 bg-accent-soft p-4 text-sm">Running the calculation. Please wait for the result.</p>}
-    {error && <p role="alert" className="sticky top-16 z-30 rounded-lg border border-critical/30 bg-critical-soft p-4 text-sm text-critical">{error}</p>}
+    {busy && <p role="status" className="sticky top-32 z-30 rounded-lg border border-accent/30 bg-accent-soft p-4 text-sm">Running the calculation. Please wait for the result.</p>}
+    {error && <p role="alert" className="sticky top-32 z-30 rounded-lg border border-critical/30 bg-critical-soft p-4 text-sm text-critical">{error}</p>}
     <fieldset disabled={busy} className="min-w-0 space-y-5">
     <PageHeader title="DRIFTVEIL Simulation Lab" description="Synthetic enterprise. Real calculations and mock effect prevention. Edit the inputs, inspect the decision, then execute a fresh sandbox." meta={<><Badge tone="accent">Three core proofs</Badge><Badge>{executionLocation}</Badge></>}
       actions={<Button onClick={exportEvidence} disabled={!runs.length && !evaluation}><Download /> Export evidence</Button>} />

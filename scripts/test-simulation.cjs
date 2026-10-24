@@ -211,6 +211,36 @@ check('workflow completion requires actual saved effects and a reviewed finding'
   assert.deepEqual(demoProgress([permitted, held, changed, repaired], null), [true, true, false, true, true]);
   assert.deepEqual(demoProgress([permitted, held, changed, repaired], held.id), [true, true, true, true, true]);
 });
+check('document-derived salary proposal returns no salary data and preserves valid procurement', () => {
+  const input = { ...sim.outcomeFixture(), selected: 'atlas' };
+  const run = sim.runOutcome(input, [], { documentAttack: true, autoHold: false });
+  const salary = run.effects.find(e => e.tool === 'hr.salary.read');
+  assert.equal(salary.status, 'held'); assert.equal(salary.data, undefined);
+  assert.equal(run.ledger.some(e => e.tool === 'hr.salary.read'), false);
+  assert.equal(run.effects.at(-1).status, 'committed');
+  assert.match(salary.reasons.join(' '), /Salary data is explicitly prohibited/);
+  assert.match(salary.binding, /supplier-document/);
+  assert.equal(sim.runOutcome(input).effects.some(e => e.tool === 'hr.salary.read'), false);
+  const invalidInput = structuredClone(input); invalidInput.suppliers[0].price = -1;
+  const invalid = sim.runOutcome(invalidInput, [], { documentAttack: true });
+  assert.equal(invalid.effects.at(-1).status, 'held');
+  assert.equal(invalid.effects.some(e => e.tool === 'hr.salary.read'), false, 'A blocked supplier read cannot produce the document-derived action');
+  const costly = sim.runOutcome(sim.outcomeFixture(), [], { documentAttack: true });
+  assert.equal(costly.effects.at(-1).status, 'held', 'Continuation cannot bypass an outcome violation');
+});
+check('comparisons execute matched controls and workload counts agree with independent ancestry', () => {
+  const { compareControls, measureGraphWorkloads } = require('../src/lib/simulationEvaluation.ts');
+  const report = compareControls();
+  assert.deepEqual(report.outcome.map(r => r.hardChoiceHeld), [false, true, true]);
+  assert.deepEqual(report.outcome.map(r => r.driftAlertWindow), [null, null, 4]);
+  assert.equal(report.outcome.every(r => r.stableAlertWindow === null), true);
+  assert.deepEqual(report.change.map(r => [r.schedulingAllowed, r.unrelatedExportHeld]), [[false, true], [true, true]]);
+  assert.deepEqual(report.recovery.map(r => [r.affectedPaymentHeld, r.independentCompleted, r.repairedPaymentCompleted]), [[true, true, false], [true, true, true]]);
+  for (const row of measureGraphWorkloads()) {
+    assert.equal(row.correct, true); assert.equal(row.edges, row.nodes - 2);
+    assert.equal(row.samples, 5); assert.ok(Number.isFinite(row.p50Ms) && row.p50Ms >= 0 && row.p95Ms >= row.p50Ms);
+  }
+});
 check('measured held-out suite and recovery assertions pass', () => {
   const report = evaluateSynthetic();
   assert.equal(report.benign, 20); assert.equal(report.attacks, 12); assert.deepEqual(report.failures, []);
@@ -218,6 +248,42 @@ check('measured held-out suite and recovery assertions pass', () => {
   assert.equal(report.stream.alertWindow, 4); assert.equal(report.stream.benignAlertWindow, null);
   fs.mkdirSync('artifacts', { recursive: true });
   fs.writeFileSync('artifacts/synthetic-evaluation.json', JSON.stringify(report, null, 2));
+});
+check('operations snapshots invalidate on relevant draft and policy changes', () => {
+  const { demoFixture } = require('../src/lib/demo.ts');
+  const { matchesOperation } = require('../src/lib/operations.ts');
+  const draft = demoFixture();
+  const options = { autoHold: true, reviewAt: 40 };
+  const run = sim.runOutcome(draft.input, [], { ...options, credentialMatch: draft.credentialMatch, toolVersion: draft.toolVersion });
+  assert.equal(matchesOperation(run, draft, options), true);
+  assert.equal(matchesOperation(run, { ...draft, history: [0, 0] }, options), true, 'Appending history does not alter saved purchase configuration');
+  assert.equal(matchesOperation(run, { ...draft, coldStart: true }, options), false);
+  assert.equal(matchesOperation(run, { ...draft, documentAttack: true }, options), false);
+  assert.equal(matchesOperation(run, draft, { ...options, autoHold: false }), false);
+  const original = JSON.stringify(run);
+  draft.input.suppliers[0].price += 100;
+  assert.equal(matchesOperation(run, draft, options), false);
+  assert.equal(JSON.stringify(run), original, 'Draft edits must not rewrite saved evidence');
+  const change = sim.runChange(draft.envelope, draft.destination, { ...options, changeReference: null }, draft.input);
+  assert.equal(matchesOperation(change, draft, options), true);
+  assert.equal(matchesOperation(change, { ...draft, destination: 'external.example' }, options), false);
+  const recovery = sim.runRecovery(draft.branch, draft.missingLineage, true, options, draft.input);
+  assert.equal(matchesOperation(recovery, draft, options), true);
+  assert.equal(matchesOperation(recovery, { ...draft, missingLineage: true }, options), false);
+});
+check('operations topology preserves contamination, uncertainty and verified replacement paths', () => {
+  const { topology, draftArtifacts } = require('../src/lib/operations.ts');
+  const { demoFixture } = require('../src/lib/demo.ts');
+  const input = { ...sim.outcomeFixture(), selected: 'atlas' };
+  const repaired = sim.runRecovery('poisoned', false, true, {}, input);
+  const nodes = topology(repaired.artifacts, repaired);
+  assert.equal(nodes.find(n => n.id === 'pending-payment').status, 'affected');
+  assert.equal(nodes.find(n => n.id === 'payment-rebuilt').status, 'verified');
+  assert.equal(nodes.find(n => n.id === 'independent-order').status, 'clean');
+  const draft = { ...demoFixture(), missingLineage: true };
+  assert.equal(topology(draftArtifacts(draft)).find(n => n.id === 'pending-payment').status, 'unresolved');
+  assert.equal(topology(sim.recoveryFixture('unknown')).find(n => n.id === 'procurement-summary').status, 'unresolved');
+  assert.equal(nodes.find(n => n.id === 'procurement-summary').parents[0], 'supplier-pdf');
 });
 check('guided screens, computed reports and persisted case state stay connected', require('./test-workflow.cjs'));
 process.stdout.write(`\n${checks} focused checks passed. Synthetic results: artifacts/synthetic-evaluation.json\n`);

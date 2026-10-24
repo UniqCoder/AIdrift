@@ -56,6 +56,17 @@ test('scoped approval and server-derived reference preserve the export prohibiti
   assert.equal(result.data.assessments[0].referenceId, candidate.data.reference.id);
   assert.equal((await post('/api/change', { ...body, destination: 'external.example' })).data.effects[0].status, 'held');
 });
+test('document salary boundary and unknown provenance match local policy', async () => {
+  const { status, data } = await post('/api/outcome', { input: input(), options: { documentAttack: true } });
+  assert.equal(status, 200);
+  assert.equal(data.effects.find(e => e.tool === 'hr.salary.read').status, 'held');
+  assert.equal(data.effects.find(e => e.tool === 'hr.salary.read').data, undefined);
+  assert.equal(data.effects.at(-1).status, 'committed');
+  const unresolved = await post('/api/recovery', { input: input(), branch: 'unknown', missingLineage: false, repair: true });
+  assert.equal(unresolved.status, 200);
+  assert.equal(unresolved.data.effects.some(e => e.actionId === 'payment-repaired'), false);
+  assert.equal((await post('/api/outcome', { input: input(), options: { documentAttack: 'yes' } })).status, 400);
+});
 test('recovery holds inherited contamination, verifies new work and refuses unresolved provenance', async () => {
   const body = { input: input(), branch: 'poisoned', missingLineage: false, repair: true };
   const { data } = await post('/api/recovery', body);

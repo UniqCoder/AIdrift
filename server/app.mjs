@@ -21,8 +21,8 @@ function approval(value) {
   return value;
 }
 function controls(value = {}) {
-  if (!object(value) || Object.keys(value).some(key => !['autoHold', 'reviewAt', 'coldStart', 'credentialMatch', 'toolVersion', 'useChangeReference'].includes(key)) ||
-      ['autoHold', 'coldStart', 'credentialMatch', 'useChangeReference'].some(key => value[key] !== undefined && typeof value[key] !== 'boolean') ||
+  if (!object(value) || Object.keys(value).some(key => !['autoHold', 'reviewAt', 'coldStart', 'credentialMatch', 'toolVersion', 'documentAttack', 'useChangeReference'].includes(key)) ||
+      ['autoHold', 'coldStart', 'credentialMatch', 'documentAttack', 'useChangeReference'].some(key => value[key] !== undefined && typeof value[key] !== 'boolean') ||
       (value.reviewAt !== undefined && (!Number.isFinite(value.reviewAt) || value.reviewAt < 0 || value.reviewAt > 100)) ||
       (value.toolVersion !== undefined && ![1, 2].includes(value.toolVersion))) throw invalid('Invalid simulation controls. Behavioral references and thresholds are computed by the server.');
   return value;
@@ -40,7 +40,7 @@ export function dispatch(path, body) {
   if (path === '/api/outcome') {
     const history = body.previousLosses ?? [];
     if (!Array.isArray(history) || history.length > 256 || history.some(n => n !== null && (!Number.isFinite(n) || n < 0))) throw invalid('Decision history must contain at most 256 nonnegative losses.');
-    return engine.runOutcome(input, history, { ...options, credentialMatch: raw.credentialMatch ?? true, toolVersion: raw.toolVersion ?? 1, ...(raw.coldStart ? { reference: null } : {}) });
+    return engine.runOutcome(input, history, { ...options, credentialMatch: raw.credentialMatch ?? true, toolVersion: raw.toolVersion ?? 1, documentAttack: raw.documentAttack ?? false, ...(raw.coldStart ? { reference: null } : {}) });
   }
   if (path === '/api/change' || path === '/api/reference') {
     const envelope = approval(body.envelope);
@@ -50,7 +50,7 @@ export function dispatch(path, body) {
     return engine.runChange(envelope, body.destination, { ...options, changeReference: reference }, input);
   }
   if (path === '/api/recovery') {
-    if (!['poisoned', 'trusted'].includes(body.branch) || typeof body.missingLineage !== 'boolean' || typeof body.repair !== 'boolean') throw invalid('Supply a supported source, provenance status and repair choice.');
+    if (!['poisoned', 'trusted', 'unknown'].includes(body.branch) || typeof body.missingLineage !== 'boolean' || typeof body.repair !== 'boolean') throw invalid('Supply a supported source, provenance status and repair choice.');
     return engine.runRecovery(body.branch, body.missingLineage, body.repair, options, input);
   }
   throw Object.assign(new Error('Unknown API endpoint.'), { status: 404 });

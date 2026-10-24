@@ -13,11 +13,23 @@ npm test
 npm run build
 ```
 
-Open http://localhost:5173/demo. The root URL opens the guided workflow. `/lab` remains the advanced input editor. `npm test` runs engine, workflow-state and server-rendered UI assertions and writes the measured fixture report to `artifacts/synthetic-evaluation.json`.
+Open http://localhost:5173/operations. The root URL opens the operations console. `/demo` retains the secondary task workspace and `/lab` the advanced input editor. `npm test` runs engine, workflow-state and server-rendered UI assertions and writes the measured fixture report to `artifacts/synthetic-evaluation.json`.
 
-## Start with the connected workflow
+For presentation evidence, open **Evidence** to see the claim-to-control map, then **Run evaluation suite** for computed comparisons and bounded graph-workload measurements. In OutcomeGuard, **Cost deviation** matches the slide's INR 1,000/INR 1,300 example. Enable **Include document-derived salary-read proposal** on a lowest-cost purchase to execute the salary-access boundary example: the read is held with no returned salary data, and valid procurement continues. Source attribution/proposals are synthetic; document language is not semantically analyzed. Export the saved case for its exact inputs, reasons and effects.
 
-The default experience follows **Task & permissions → Run & test → Investigate → Approve change → Recover work → Evidence & report**. One saved case carries the task and supplier inputs into finance and recovery. Each stage explains its purpose, the calculated result and the next action.
+## Operations console
+
+The application uses persistent horizontal navigation for Security operations, Activity, Findings, Reports, Task workspace, Advanced lab and Settings. On smaller screens the same navigation scrolls horizontally; there is no sidebar or illustrative-workspace launcher. Operational body text and labels use a larger, higher-contrast type scale.
+
+The default interface is an operational system with directly accessible Overview, OutcomeGuard, DriftGate, ChainRestore and Evidence workspaces. It uses the existing shared engine and optional API; it introduces no scripted verdicts. Edit offers and task constraints, execute proposed actions, manage exact change scope, recall/rebuild dependent state and export the saved case. The 3D graph visualizes the latest recovery snapshot or a labeled draft preview, supports node inspection and has an accessible list/failure fallback. Stale results retain their original evidence.
+
+Metrics count action attempts across run-local mock ledgers in the current case; they are not production telemetry or deduplicated enterprise transactions. Evaluation is a separate controlled synthetic suite. Creating a case preserves previous runs. The implementation plan is [PROTOTYPE_IMPLEMENTATION_PLAN.md](PROTOTYPE_IMPLEMENTATION_PLAN.md).
+
+`node scripts/smoke-operations.cjs` exercises the operations console against an isolated headless Chrome debug session on port 9223, including mobile layout, graph fallback and evidence downloads. Screenshots are written under `.browser-test/operations-review/`.
+
+## Secondary connected task workspace
+
+The secondary task workspace follows **Set task → Run purchase → Review finding → Approve change → Recover work → Export report**. One saved case carries the task and supplier inputs into finance and recovery. Each stage explains its purpose, the calculated result and the next action. Advanced controls and raw evidence expand on demand; the existing visual theme is retained.
 
 Run a normal purchase first, select Beacon to create a held purchase, record an evidence review, correct the supplier, approve scoped scheduling, recall/rebuild affected work and export the case. Credential mismatch, changed tools, cold start, slow drift and incomplete provenance can be tested without leaving this flow. Step 4 also demonstrates learning from three permitted scheduling executions, validating a fourth and promoting a scope-specific reference; those deterministic samples are not independent real-agent sessions.
 

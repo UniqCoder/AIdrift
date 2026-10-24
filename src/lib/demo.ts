@@ -9,6 +9,7 @@ export interface DemoState {
   credentialMatch: boolean;
   toolVersion: number;
   coldStart: boolean;
+  documentAttack?: boolean;
   branch: string;
   missingLineage: boolean;
   changeReference: Reference | null;
@@ -18,7 +19,7 @@ export interface DemoState {
 export function demoFixture(): DemoState {
   return { id: crypto.randomUUID(), input: { ...outcomeFixture(), selected: "atlas" }, history: [],
     envelope: { ...changeFixture(), approved: false }, destination: "finance.internal", credentialMatch: true,
-    toolVersion: 1, coldStart: false, branch: "poisoned", missingLineage: false, changeReference: null, reviewedRunId: null };
+    toolVersion: 1, coldStart: false, documentAttack: false, branch: "poisoned", missingLineage: false, changeReference: null, reviewedRunId: null };
 }
 
 export function demoProgress(runs: ProofRun[], reviewedRunId: string | null): boolean[] {

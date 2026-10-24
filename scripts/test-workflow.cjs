@@ -25,6 +25,8 @@ module.exports = () => {
     const Activity = require('../src/pages/Activity.tsx').default;
     const Incidents = require('../src/pages/Incidents.tsx').default;
     const { AppShell } = require('../src/components/layout/AppShell.tsx');
+    require.extensions['.css'] = () => {};
+    const Operations = require('../src/pages/Operations.tsx').default;
     const { runOutcome, runChange, runRecovery, changeFixture, outcomeFixture } = require('../src/lib/simulation.ts');
     const render = (Page, entry) => {
       // Zustand's server renderer reads its initial snapshot; mirror the tested browser state.
@@ -38,8 +40,13 @@ module.exports = () => {
     assert.equal(render(Activity, '/activity').includes('Recent sessions'), false);
     assert.match(render(Incidents, '/incidents'), /No findings match/);
     const navigation = render(AppShell, '/demo');
-    assert.ok(navigation.includes('Guided workflow'));
+    assert.ok(navigation.includes('Security operations'));
+    assert.ok(navigation.includes('Task workspace'));
     assert.equal(navigation.includes('Role Contracts'), false);
+    assert.equal(navigation.includes('Explore illustrative workspace'), false);
+    assert.equal(navigation.includes('<aside'), false);
+    assert.match(navigation, /aria-label="Primary"/);
+    for (const route of ['/operations', '/activity', '/incidents', '/reports', '/demo', '/lab', '/settings']) assert.ok(navigation.includes(`href="${route}"`));
     const id = useStore.getState().demo.id;
     const benign = runOutcome(useStore.getState().demo.input);
     const held = runOutcome(outcomeFixture());
@@ -58,9 +65,24 @@ module.exports = () => {
     assert.equal(persisted.demo.reviewedRunId, held.id);
     assert.equal(persisted.proofRuns.length, 4);
     const snapshot = JSON.stringify(useStore.getState().proofRuns);
+    const { evaluateSynthetic } = require('../src/lib/simulationEvaluation.ts');
+    useStore.getState().setEvaluation(evaluateSynthetic());
+    assert.match(render(Operations, '/operations?view=evidence'), /What this prototype demonstrates/);
+    const evidence = render(Operations, '/operations?view=evidence');
+    for (const text of ['Task rules + learned history', 'Bounded dependency workload']) assert.ok(evidence.includes(text), text);
+    useStore.getState().updateDemo({ documentAttack: true });
+    const documentRun = runOutcome(useStore.getState().demo.input, [], { documentAttack: true, autoHold: true, reviewAt: 40, credentialMatch: true, toolVersion: 1 });
+    useStore.getState().recordProofRun({ ...documentRun, workflowId: id });
+    const outcomePage = render(Operations, '/operations?view=outcome');
+    assert.match(outcomePage, /Read HR salary records/);
+    assert.match(outcomePage, /Evaluate document proposal/);
+    assert.match(render(Operations, '/operations?view=change'), /Reference governance/);
+    assert.match(render(Operations, '/operations?view=recovery'), /Incomplete provenance|Historical lineage preserved/);
+    const allSnapshots = JSON.stringify(useStore.getState().proofRuns);
     useStore.getState().newDemo();
     assert.notEqual(useStore.getState().demo.id, id);
-    assert.equal(JSON.stringify(useStore.getState().proofRuns), snapshot);
+    assert.equal(JSON.stringify(useStore.getState().proofRuns), allSnapshots);
+    assert.ok(allSnapshots.includes(snapshot.slice(1, -1)), 'Existing evidence remains unchanged');
     assert.match(render(Demo, '/demo?step=5'), /Not yet demonstrated/);
   } finally {
     Module._resolveFilename = resolve;
