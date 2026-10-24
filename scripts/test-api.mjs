@@ -8,6 +8,7 @@ const { default: engine } = await import('../server/dist/simulation.cjs');
 
 let server; let base;
 before(async () => {
+  process.env.FRONTEND_ORIGIN = 'https://judge.example';
   server = createServer();
   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
   base = `http://127.0.0.1:${server.address().port}`;
@@ -24,6 +25,14 @@ test('health identifies the service and updated USP names', async () => {
   const health = await response.json();
   assert.equal(response.status, 200); assert.equal(health.service, 'driftveil-api');
   assert.deepEqual(Object.values(health.usps), ['OutcomeGuard', 'DriftGate', 'ChainRestore']);
+});
+test('browser API access is limited to the configured frontend origin', async () => {
+  const allowed = await fetch(base + '/api/outcome', { method: 'OPTIONS', headers: { Origin: 'https://judge.example', 'Access-Control-Request-Method': 'POST', 'Access-Control-Request-Headers': 'content-type' } });
+  assert.equal(allowed.status, 204);
+  assert.equal(allowed.headers.get('access-control-allow-origin'), 'https://judge.example');
+  const denied = await fetch(base + '/api/outcome', { method: 'OPTIONS', headers: { Origin: 'https://other.example', 'Access-Control-Request-Method': 'POST' } });
+  assert.equal(denied.status, 403);
+  assert.equal(denied.headers.get('access-control-allow-origin'), null);
 });
 test('API executes the same valid, invalid and credential-bound purchase decisions', async () => {
   for (const [body, expected] of [

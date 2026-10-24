@@ -71,12 +71,20 @@ function readJSON(req) {
   });
 }
 export function createServer() {
+  const frontendOrigin = process.env.FRONTEND_ORIGIN;
   return http.createServer({ requestTimeout: 15000, headersTimeout: 10000, maxHeaderSize: 16384 }, async (req, res) => {
+    const origin = req.headers.origin;
+    const cors = origin && origin === frontendOrigin ? { 'Access-Control-Allow-Origin': origin, Vary: 'Origin' } : {};
     const send = (status, value) => {
-      res.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff', ...(status === 413 ? { Connection: 'close' } : {}) });
+      res.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff', ...cors, ...(status === 413 ? { Connection: 'close' } : {}) });
       res.end(JSON.stringify(value));
     };
     try {
+      if (req.method === 'OPTIONS') {
+        if (!cors['Access-Control-Allow-Origin']) return send(403, { error: 'Origin is not allowed.' });
+        res.writeHead(204, { ...cors, 'Access-Control-Allow-Methods': 'GET, POST, OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type' });
+        return res.end();
+      }
       const path = new URL(req.url, 'http://localhost').pathname;
       if (req.method === 'GET' && ['/health', '/api/health'].includes(path)) return send(200, { status: 'ok', service: 'driftveil-api', engine: engine.ENGINE_VERSION, synthetic: true, usps: engine.PROOF_NAMES });
       if (!['/api/outcome', '/api/change', '/api/reference', '/api/recovery', '/api/evaluation'].includes(path)) return send(404, { error: 'Unknown API endpoint.' });
