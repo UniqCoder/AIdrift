@@ -65,11 +65,11 @@ export default function SimulationLab() {
     {busy && <p role="status" className="sticky top-32 z-30 rounded-lg border border-accent/30 bg-accent-soft p-4 text-sm">Running the calculation. Please wait for the result.</p>}
     {error && <p role="alert" className="sticky top-32 z-30 rounded-lg border border-critical/30 bg-critical-soft p-4 text-sm text-critical">{error}</p>}
     <fieldset disabled={busy} className="min-w-0 space-y-5">
-    <PageHeader title="DRIFTVEIL Simulation Lab" description="Synthetic enterprise. Real calculations and mock effect prevention. Edit the inputs, inspect the decision, then execute a fresh sandbox." meta={<><Badge tone="accent">Three core proofs</Badge><Badge>{executionLocation}</Badge></>}
+    <PageHeader title="Advanced lab" description="Edit inputs, inspect a decision and execute a fresh sandbox." meta={<><Badge tone="accent">Synthetic environment</Badge><Badge>{executionLocation}</Badge></>}
       actions={<Button onClick={exportEvidence} disabled={!runs.length && !evaluation}><Download /> Export evidence</Button>} />
     <Panel className="border-accent/30 bg-accent-soft p-4">
       <p className="text-sm font-medium">Valid credentials. Wrong business outcome. Caught before the mock effect.</p>
-      <p className="mt-1 text-xs leading-relaxed text-muted">The environment and agent proposals are synthetic; security verdicts come from shared policy, outcome arithmetic, learned benign statistics and dependency checks. No real agent, bank or company system is connected.</p>
+      <details className="mt-2 text-sm"><summary className="cursor-pointer text-accent">Execution scope</summary><p className="mt-3 leading-relaxed text-muted">The environment and agent proposals are synthetic; security verdicts come from shared policy, outcome arithmetic, learned benign statistics and dependency checks. No real agent, bank or company system is connected.</p></details>
     </Panel>
     <div className="flex flex-wrap gap-2" aria-label="Core simulations">
       {([ ["outcome", Target], ["change", ShieldCheck], ["recovery", GitBranch], ["evaluation", FlaskConical] ] as const).map(([key, Icon]) => <Button key={key} variant={tab === key ? "primary" : "secondary"} onClick={() => setTab(key)} aria-pressed={tab === key}><Icon />{key === "evaluation" ? "Measured evaluation" : PROOF_NAMES[key]}</Button>)}
@@ -87,7 +87,7 @@ export default function SimulationLab() {
               <Field label="Task family"><select className={selectClass} value={input.task.family} onChange={e => editInput({ ...input, task: { ...input.task, family: e.target.value as "standard" | "urgent" } })}><option value="standard">Standard procurement</option><option value="urgent">Urgent procurement (cold start)</option></select></Field>
             </div>
             <div className="overflow-x-auto"><table className="w-full min-w-[510px] text-left text-xs"><thead><tr className="text-muted">{["Supplier", "Unit price (paise)", "Days", "Quality", "Eligible"].map(h => <th key={h} className="pb-2 pr-2 font-medium">{h}</th>)}</tr></thead><tbody>
-              {input.suppliers.map((s, i) => { const update = (patch: Partial<typeof s>) => editInput({ ...input, suppliers: input.suppliers.map((v, j) => i === j ? { ...v, ...patch, version: v.version + 1 } : v) }); return <tr key={s.id} className="border-t border-border"><td className="py-3 pr-2"><span className="block">{s.name}</span><span className="text-[10px] text-muted">Source v{s.version}</span></td>
+              {input.suppliers.map((s, i) => { const update = (patch: Partial<typeof s>) => editInput({ ...input, suppliers: input.suppliers.map((v, j) => i === j ? { ...v, ...patch, version: v.version + 1 } : v) }); return <tr key={s.id} className="border-t border-border"><td className="py-3 pr-2"><span className="block">{s.name}</span><span className="text-[12px] text-muted">Source v{s.version}</span></td>
                 <td className="py-3 pr-2"><Input aria-label={`${s.name} price in paise`} className="min-w-24" type="number" min={0} value={Number.isFinite(s.price) ? s.price : ""} onChange={e => update({ price: e.target.value === "" ? NaN : Number(e.target.value) })} /></td>
                 <td className="py-3 pr-2"><Input aria-label={`${s.name} delivery days`} type="number" min={0} value={Number.isFinite(s.days) ? s.days : ""} onChange={e => update({ days: e.target.value === "" ? NaN : Number(e.target.value) })} /></td>
                 <td className="py-3 pr-2"><Input aria-label={`${s.name} quality`} type="number" min={0} max={100} value={Number.isFinite(s.quality) ? s.quality : ""} onChange={e => update({ quality: e.target.value === "" ? NaN : Number(e.target.value) })} /></td>
@@ -100,7 +100,7 @@ export default function SimulationLab() {
               <Button onClick={() => { const next = outcomeFixture(); next.task.deadline = 2; next.task.family = "urgent"; editInput(next); }}>Load valid urgent purchase</Button>
               <Button variant="ghost" onClick={() => editInput(outcomeFixture())}>Reset fixture</Button>
             </div>
-            <p className="text-[11px] leading-relaxed text-subtle">Edits fork a new sandbox and reset its decision-window history. Saved evidence stays unchanged. Payload wording is not interpreted by an LLM.</p>
+            <p className="text-xs leading-relaxed text-subtle">Edits fork a new sandbox and reset its decision-window history. Saved evidence stays unchanged. Payload wording is not interpreted by an LLM.</p>
           </div>
         </Panel>
         <div className="space-y-4">
@@ -111,7 +111,7 @@ export default function SimulationLab() {
           </div></Panel>
           <Panel><PanelHeader title="Computed cumulative drift" description={`${history.length} executed windows + next proposal preview`} /><div className="p-4">
             <div className="h-44"><ResponsiveContainer width="100%" height="100%"><LineChart data={preview.drift}><CartesianGrid stroke="var(--border)" strokeDasharray="3 3" /><XAxis dataKey="window" tick={{ fill: "var(--muted)", fontSize: 11 }} /><YAxis domain={[0, Math.max(0.12, ...preview.drift.map(p => p.cumulative))]} tick={{ fill: "var(--muted)", fontSize: 11 }} width={35} /><Tooltip contentStyle={{ background: "var(--surface)", border: "1px solid var(--border)" }} /><ReferenceLine y={ref.threshold} stroke="var(--critical)" strokeDasharray="4 4" /><Line dataKey="cumulative" name="CUSUM" type="linear" stroke="var(--accent)" strokeWidth={2} isAnimationActive={false} /></LineChart></ResponsiveContainer></div>
-            <p className="mt-3 text-[11px] leading-relaxed text-muted">Reference {preview.referenceId ?? "unavailable for urgent family"}. {ref.samples} benign training purchases / {ref.transitionSamples} learned tool transitions. Mean loss {percent(ref.mean)}; allowance {percent(ref.allowance)}; threshold {ref.threshold}. Alert = cumulative excess loss, even with the same approved tool path. No automatic baseline reset.</p>
+            <p className="mt-3 text-xs leading-relaxed text-muted">Reference {preview.referenceId ?? "unavailable for urgent family"}. {ref.samples} benign training purchases / {ref.transitionSamples} learned tool transitions. Mean loss {percent(ref.mean)}; allowance {percent(ref.allowance)}; threshold {ref.threshold}. Alert = cumulative excess loss, even with the same approved tool path. No automatic baseline reset.</p>
           </div></Panel>
         </div>
       </div>
@@ -125,7 +125,7 @@ export default function SimulationLab() {
         <Field label="Approved destination"><Input value={envelope.scope.destination} onChange={e => { setEnvelope({ ...envelope, scope: { ...envelope.scope, destination: e.target.value } }); setLastRun(null); }} /></Field>
         <Field label="Actual scheduling destination"><Input value={destination} onChange={e => { setDestination(e.target.value); setLastRun(null); }} /></Field>
         <Button variant="primary" onClick={() => perform(async () => save(await simulationClient.change(envelope, destination, options)))}><Play /> Execute both proposed actions</Button>
-        <p className="text-[11px] text-subtle">Approvals are operator-controlled synthetic fixtures. Production approval authentication is future work.</p>
+        <p className="text-xs text-subtle">Approvals are operator-controlled synthetic fixtures. Production approval authentication is future work.</p>
       </div></Panel>
       <div className="space-y-4"><Panel><PanelHeader title="Payment scheduling" description="Known tool + exact approved scope" /><div className="p-4"><Finding value={schedulePreview} /></div></Panel><Panel><PanelHeader title="Simultaneous bank-details export" description="Valid credential; no permission to export this data" /><div className="p-4"><Finding value={exportPreview} /></div></Panel></div>
     </div>}
@@ -141,7 +141,7 @@ export default function SimulationLab() {
       <Panel><PanelHeader title="Recorded dependency paths" actions={<Badge tone="warning">{exposure.affected.length} affected / {exposure.unresolved.length} unresolved</Badge>} /><div className="space-y-2 p-4">{(lastRun?.kind === "recovery" ? lastRun.artifacts! : graph).map(node => {
         const actual = traceExposure(lastRun?.kind === "recovery" ? lastRun.artifacts! : graph);
         const status = actual.unresolved.includes(node.id) ? "unresolved" : actual.affected.includes(node.id) ? "recalled" : "clean path";
-        return <div key={node.id} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border bg-bg p-3 text-xs"><div><span className="font-mono">{node.id}</span><p className="mt-1 text-[11px] text-muted">{node.parents.length ? `${node.parents.join(", ")} → ${node.id}` : "Source record"} · v{node.version}</p></div><Badge tone={status === "clean path" ? "healthy" : "warning"}>{status}</Badge></div>;
+        return <div key={node.id} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border bg-bg p-3 text-xs"><div><span className="font-mono">{node.id}</span><p className="mt-1 text-xs text-muted">{node.parents.length ? `${node.parents.join(", ")} → ${node.id}` : "Source record"} · v{node.version}</p></div><Badge tone={status === "clean path" ? "healthy" : "warning"}>{status}</Badge></div>;
       })}</div></Panel>
     </div>}
     {tab === "evaluation" && <Panel><PanelHeader title="Measured synthetic evaluation" description="Ground truth labels stay outside the detector." actions={<Button variant="primary" onClick={() => perform(async () => setEvaluation(await simulationClient.evaluation()))}><Play /> Run held-out evaluation</Button>} /><div className="space-y-4 p-4">
@@ -155,10 +155,10 @@ export default function SimulationLab() {
       </> : <p className="text-sm text-muted">No measured results yet. Run the evaluation to populate metrics.</p>}
     </div></Panel>}
     {lastRun && <Effects run={lastRun} />}
-    {selectedRun && <Panel className="p-4"><div className="flex items-center justify-between"><h2 className="text-sm font-semibold">Saved evidence: {PROOF_NAMES[selectedRun.kind]}</h2><Button size="sm" onClick={() => setParams({ tab })}>Close snapshot</Button></div><Effects run={selectedRun} /><details className="mt-3 text-xs"><summary className="cursor-pointer text-accent">Immutable inputs, decisions, lineage and effect ledger</summary><pre className="mt-3 max-h-96 overflow-auto whitespace-pre-wrap rounded bg-bg p-3 text-[11px]">{JSON.stringify(selectedRun, null, 2)}</pre></details></Panel>}
+    {selectedRun && <Panel className="p-4"><div className="flex items-center justify-between"><h2 className="text-sm font-semibold">Saved evidence: {PROOF_NAMES[selectedRun.kind]}</h2><Button size="sm" onClick={() => setParams({ tab })}>Close snapshot</Button></div><Effects run={selectedRun} /><details className="mt-3 text-xs"><summary className="cursor-pointer text-accent">Immutable inputs, decisions, lineage and effect ledger</summary><pre className="mt-3 max-h-96 overflow-auto whitespace-pre-wrap rounded bg-bg p-3 text-xs">{JSON.stringify(selectedRun, null, 2)}</pre></details></Panel>}
     <ProofSummary />
     <Panel><PanelHeader title="Saved computed runs" description="Each execution has its own source/policy snapshot; edits leave prior evidence intact." /><div className="divide-y divide-border">{runs.length ? runs.slice(0, 15).map(run => <Link key={run.id} to={`/lab?tab=${run.kind}&run=${run.id}`} className="flex flex-wrap items-center justify-between gap-2 p-4 text-xs hover:bg-hover"><div><span className="font-medium">{PROOF_NAMES[run.kind]}</span><p className="mt-1 text-muted">{run.summary}</p></div><span className="text-accent">{new Date(run.at).toLocaleTimeString()} · View evidence →</span></Link>) : <p className="p-4 text-xs text-muted">No computed run history yet.</p>}</div></Panel>
-    <p className="text-[11px] text-subtle">Local browser state; operator editable, without production tamper protection. New storage namespace driftveil-demo-v2 starts fresh; older scripted history is not migrated into measured runs. Supporting replay/decoy/integration screens remain illustrative.</p>
+    <p className="text-xs text-subtle">Local browser state; operator editable, without production tamper protection. New storage namespace driftveil-demo-v2 starts fresh; older scripted history is not migrated into measured runs. Supporting replay/decoy/integration screens remain illustrative.</p>
     </fieldset>
   </div>;
 }

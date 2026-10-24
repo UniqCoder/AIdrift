@@ -63,6 +63,10 @@
 }
 
 @theme inline {
+  --text-xs: 0.875rem;
+  --text-xs--line-height: 1.6;
+  --text-sm: 0.9375rem;
+  --text-sm--line-height: 1.65;
   --color-bg: var(--bg);
   --color-surface: var(--surface);
   --color-elevated: var(--elevated);
@@ -148,10 +152,10 @@ body {
 
 .eyebrow {
   font-family: var(--font-mono);
-  font-size: 10.5px;
+  font-size: 12px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--subtle);
+  color: var(--muted);
 }
 
 .tabular {

@@ -86,15 +86,15 @@ export default function IncidentDetail() {
               <TabsList className="overflow-x-auto px-2">
                 <TabsTrigger value="overview">Overview</TabsTrigger>
                 <TabsTrigger value="timeline">Timeline</TabsTrigger>
-                <TabsTrigger value="evidence">Evidence <span className="font-mono text-[11px] text-subtle">{inc.evidence.length}</span></TabsTrigger>
+                <TabsTrigger value="evidence">Evidence <span className="font-mono text-xs text-subtle">{inc.evidence.length}</span></TabsTrigger>
                 <TabsTrigger value="replay">Replay</TabsTrigger>
-                <TabsTrigger value="notes">Notes <span className="font-mono text-[11px] text-subtle">{inc.notes.length}</span></TabsTrigger>
+                <TabsTrigger value="notes">Notes <span className="font-mono text-xs text-subtle">{inc.notes.length}</span></TabsTrigger>
               </TabsList>
 
               <TabsContent value="overview" className="space-y-5 p-4">
                 <div>
                   <div className="mb-1 text-xs text-subtle">Root cause</div>
-                  <p className="text-[13px] leading-relaxed">{inc.rootCause}</p>
+                  <p className="text-sm leading-relaxed">{inc.rootCause}</p>
                 </div>
                 <div className="grid gap-5 md:grid-cols-2">
                   <div>
@@ -130,9 +130,9 @@ export default function IncidentDetail() {
                       <span className={`absolute -left-[5px] top-1 size-2.5 rounded-full ring-4 ring-surface ${toneBg[t.tone]}`} />
                       <div className="flex flex-wrap items-baseline gap-x-3">
                         <Mono className="text-subtle">{fmtTime(t.ts)}</Mono>
-                        <span className="text-[13px]">{t.label}</span>
+                        <span className="text-sm">{t.label}</span>
                       </div>
-                      <div className="text-[11px] text-muted">{t.actor}</div>
+                      <div className="text-xs text-muted">{t.actor}</div>
                     </li>
                   ))}
                 </ol>
@@ -150,11 +150,11 @@ export default function IncidentDetail() {
                         </span>
                         <div className="min-w-0 flex-1">
                           <div className="flex flex-wrap items-center gap-2">
-                            <span className="text-[13px]">{e.title}</span>
+                            <span className="text-sm">{e.title}</span>
                             <Badge className="capitalize">{e.kind.replace("_", " ")}</Badge>
                           </div>
                           <p className="mt-1 break-words text-xs leading-relaxed text-muted">{e.detail}</p>
-                          <Mono className="mt-1 block text-[10px] text-subtle">Evidence reference: {e.hash}</Mono>
+                          <Mono className="mt-1 block text-[12px] text-subtle">Evidence reference: {e.hash}</Mono>
                         </div>
                       </li>
                     );
@@ -179,11 +179,11 @@ export default function IncidentDetail() {
                 <ul className="mb-4 space-y-3">
                   {inc.notes.map((n, i) => (
                     <li key={i} className="rounded-lg border border-border bg-elevated/40 p-3">
-                      <div className="flex items-center gap-2 text-[11px] text-subtle">
+                      <div className="flex items-center gap-2 text-xs text-subtle">
                         <span className="text-fg">{n.author}</span>
                         {fmtDateTime(n.ts)}
                       </div>
-                      <p className="mt-1 text-[13px]">{n.text}</p>
+                      <p className="mt-1 text-sm">{n.text}</p>
                     </li>
                   ))}
                   {!inc.notes.length && <li className="text-xs text-muted">No analyst notes yet.</li>}

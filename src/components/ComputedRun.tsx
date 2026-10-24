@@ -14,8 +14,9 @@ const EFFECT_LABELS = { held: "Held", committed: "Completed", duplicate: "No ext
 export function Finding({ value }: { value: Assessment }) {
   return <div className="rounded-xl border border-border bg-bg p-4" aria-live="polite">
     <div className="flex flex-wrap items-center gap-3"><DecisionBadge decision={value.decision} /><span className="text-sm">Risk {value.score}/100</span><Badge>{{ base: "Existing permission", "approved delta": "Approved change", outside: "Outside permissions" }[value.scope]}</Badge></div>
-    <ul className="mt-3 list-disc space-y-2 pl-4 text-sm leading-relaxed text-muted">{value.reasons.map((reason, i) => <li key={i}>{reason}</li>)}</ul>
-    <p className="mt-3 text-[11px] text-subtle">Heuristic score, not a probability. Hard policy gates apply independently.</p>
+    <p className="mt-3 text-base leading-relaxed">{value.reasons[0]}</p>
+    {value.reasons.length > 1 && <details className="mt-3 text-sm"><summary className="cursor-pointer text-accent">All policy reasons ({value.reasons.length})</summary><ul className="mt-3 list-disc space-y-2 pl-4 text-muted">{value.reasons.slice(1).map((reason, i) => <li key={i}>{reason}</li>)}</ul></details>}
+    <p className="mt-3 text-xs text-muted">Risk is a heuristic score, not a probability.</p>
     <details className="mt-3 text-xs"><summary className="cursor-pointer text-accent">Calculated signal contributions</summary><div className="mt-3"><SignalBreakdown signals={value.signals} /></div></details>
   </div>;
 }

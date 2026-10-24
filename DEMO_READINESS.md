@@ -1,5 +1,13 @@
 # DRIFTVEIL connected demo coverage
 
+## Readability and control hierarchy — 24 October 2026
+
+Later user instruction: reduce dense, small text and make the core features easier to use throughout. Shared body, label, table, form, status and button typography was increased. Primary operational text uses 16px; shared secondary text uses 14px. The three control cards precede detailed topology. Non-overview workspaces use their feature name as the main heading and omit dashboard counters. Purchase results appear next to the proposal, with a direct result link for narrow screens. Phone layouts prioritize controls over the topology and omit repeated headings.
+
+Behavior history, document misuse tests, reference learning, control coverage and comparative/workload tables use native disclosures. The complete calculations, reasons, snapshots and exports are retained. Reports show feature, held/completed counts and time first, with long decision summaries on demand. Primary policy reasons remain visible; additional reasons are expandable. Advanced Lab scope details are collapsed.
+
+Verification: 33 focused checks and TypeScript/production compilation pass. Fresh isolated Chrome checks pass for operational workflows, disclosure opening/default state, 16px operational body text, feature-card ordering, saved results, export, mobile overflow, light theme, keyboard focus, reduced motion and topology fallback. The secondary guided/Lab browser suite also passes, including recovery, persistence and report consistency, with no uncaught browser exceptions. This supersedes the browser-startup limitation recorded for the preceding release. Windows required an isolated browser launch outside the restricted process sandbox; no personal profile was used.
+
 ## Judge evidence release — 24 October 2026
 
 Later user instruction: complete the important PPT demonstrations and prepare a shareable judge link. Engine `driftveil-synthetic-2.2` adds a synthetic supplier-document proposal for `fs.read(hr.salary)`. The registered HR resource/tool is evaluated by the same role, scope, source and hard-policy checks; no salary data is returned, and an independently valid purchase may complete. The narrative/source attribution is fixture input, not a PDF parser or semantic injection detector. Blocked supplier reads do not produce the document-derived proposal.

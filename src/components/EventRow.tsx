@@ -32,31 +32,31 @@ export function EventRow({ e, dense, onClick, selected }: { e: SecurityEvent; de
         flagged && "bg-critical-soft/30",
       )}
     >
-      {!dense && <span className="font-mono text-[11px] tabular text-subtle">{fmtTime(e.ts)}</span>}
+      {!dense && <span className="font-mono text-xs tabular text-subtle">{fmtTime(e.ts)}</span>}
       <span className={cn("grid size-6 place-items-center rounded-md border border-border bg-elevated", flagged ? "text-critical" : "text-subtle")}>
         <Icon className="size-3.5" />
       </span>
       <div className="min-w-0">
         <div className="flex min-w-0 items-center gap-2">
-          <span className="truncate font-mono text-[12px] text-fg">{e.action}</span>
-          <span className="text-[10px] text-subtle">{e.computed ? "Computed" : "Fixture"}</span>
+          <span className="truncate font-mono text-xs text-fg">{e.action}</span>
+          <span className="text-[12px] text-subtle">{e.computed ? "Computed" : "Fixture"}</span>
         </div>
-        <div className="truncate text-[11px] text-muted">
+        <div className="truncate text-xs text-muted">
           {agent?.name ?? e.agentId}
           {dense ? ` / ${fmtTime(e.ts)}` : ""}
         </div>
       </div>
-      {!dense && <span className="hidden truncate font-mono text-[11px] text-muted md:block">{e.target}</span>}
+      {!dense && <span className="hidden truncate font-mono text-xs text-muted md:block">{e.target}</span>}
       <div className="flex items-center gap-2">
         <DecisionBadge decision={e.decision} />
         {e.incidentId && (
-          <Link to={`/incidents/${e.incidentId}`} onClick={(ev) => ev.stopPropagation()} className="hidden items-center gap-0.5 font-mono text-[11px] text-accent hover:underline sm:inline-flex">
+          <Link to={`/incidents/${e.incidentId}`} onClick={(ev) => ev.stopPropagation()} className="hidden items-center gap-0.5 font-mono text-xs text-accent hover:underline sm:inline-flex">
             {e.incidentId}
             <ArrowUpRight className="size-3" />
           </Link>
         )}
       </div>
-      {!dense && <span className={cn("text-right font-mono text-[12px] tabular", toneText[riskTone(e.risk)])}>{e.risk}</span>}
+      {!dense && <span className={cn("text-right font-mono text-xs tabular", toneText[riskTone(e.risk)])}>{e.risk}</span>}
     </div>
   );
 }

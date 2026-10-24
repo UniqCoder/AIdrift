@@ -54,7 +54,7 @@ export function DataTable<T>({
                 const sortable = h.column.getCanSort();
                 const dir = h.column.getIsSorted();
                 return (
-                  <th key={h.id} className="h-9 whitespace-nowrap px-4 text-[11px] font-medium text-subtle" style={{ width: h.getSize() !== 150 ? h.getSize() : undefined }}>
+                  <th key={h.id} className="h-9 whitespace-nowrap px-4 text-xs font-medium text-subtle" style={{ width: h.getSize() !== 150 ? h.getSize() : undefined }}>
                     {sortable ? (
                       <button onClick={h.column.getToggleSortingHandler()} className="inline-flex items-center gap-1 hover:text-fg">
                         {flexRender(h.column.columnDef.header, h.getContext())}
@@ -79,7 +79,7 @@ export function DataTable<T>({
               className={cn("transition-colors", onRowClick && "cursor-pointer hover:bg-hover/50 focus:bg-hover/50 focus:outline-none", rowClassName?.(r.original))}
             >
               {r.getVisibleCells().map((c) => (
-                <td key={c.id} className={cn("px-4 text-[13px]", compact ? "py-1.5" : "py-2.5")}>
+                <td key={c.id} className={cn("px-4 text-sm", compact ? "py-1.5" : "py-2.5")}>
                   {flexRender(c.column.columnDef.cell, c.getContext())}
                 </td>
               ))}

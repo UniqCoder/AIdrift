@@ -44,7 +44,7 @@ export function Badge({ tone = "neutral", className, children, ...p }: HTMLAttri
   return (
     <span
       className={cn(
-        "inline-flex h-5 items-center gap-1 whitespace-nowrap rounded border px-1.5 text-[11px] font-medium leading-none [&_svg]:size-3",
+        "inline-flex min-h-6 items-center gap-1 whitespace-nowrap rounded border px-2 py-1 text-xs font-medium leading-none [&_svg]:size-3",
         toneClasses[tone],
         className,
       )}
@@ -74,11 +74,11 @@ export function PanelHeader({
   icon?: ReactNode;
 }) {
   return (
-    <div className={cn("flex min-h-12 items-center justify-between gap-3 px-4 pb-2 pt-3.5", className)}>
+    <div className={cn("flex min-h-14 flex-wrap items-center justify-between gap-3 px-5 pb-3 pt-5", className)}>
       <div className="flex min-w-0 items-center gap-2">
         {icon && <span className="text-subtle [&_svg]:size-4">{icon}</span>}
         <div className="min-w-0">
-          <h3 className="text-[13px] font-medium tracking-[-0.005em] text-fg">{title}</h3>
+          <h3 className="text-base font-semibold tracking-[-0.005em] text-fg">{title}</h3>
           {description && <p className="text-xs text-muted">{description}</p>}
         </div>
       </div>
@@ -91,7 +91,7 @@ export const Input = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputE
   <input
     ref={ref}
     className={cn(
-      "h-8 w-full rounded-lg border border-border bg-bg px-2.5 text-[13px] text-fg placeholder:text-subtle transition-colors hover:border-border-strong focus:border-accent focus:outline-none",
+      "h-10 w-full rounded-lg border border-border bg-bg px-3 text-sm text-fg placeholder:text-subtle transition-colors hover:border-border-strong focus:border-accent focus:outline-none",
       className,
     )}
     {...p}
@@ -103,7 +103,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaHTMLAttributes<H
   <textarea
     ref={ref}
     className={cn(
-      "w-full rounded-md border border-border bg-bg px-2.5 py-2 text-[13px] text-fg placeholder:text-subtle transition-colors hover:border-border-strong focus:border-accent focus:outline-none",
+      "w-full rounded-md border border-border bg-bg px-3 py-2 text-sm text-fg placeholder:text-subtle transition-colors hover:border-border-strong focus:border-accent focus:outline-none",
       className,
     )}
     {...p}
@@ -131,13 +131,13 @@ export function Empty({ icon, title, body, action }: { icon?: ReactNode; title: 
 }
 
 export function Kbd({ children }: { children: ReactNode }) {
-  return <kbd className="rounded border border-border bg-elevated px-1.5 py-0.5 font-mono text-[10px] text-muted">{children}</kbd>;
+  return <kbd className="rounded border border-border bg-elevated px-1.5 py-0.5 font-mono text-[12px] text-muted">{children}</kbd>;
 }
 
 export function SimTag({ className, label = "Simulated" }: { className?: string; label?: string }) {
   return (
     <span
-      className={cn("inline-flex h-5 items-center gap-1 rounded-full border border-border px-2 font-mono text-[10px] uppercase tracking-[0.1em] text-muted [&_svg]:size-3 [&_svg]:text-accent", className)}
+      className={cn("inline-flex h-5 items-center gap-1 rounded-full border border-border px-2 font-mono text-[12px] uppercase tracking-[0.1em] text-muted [&_svg]:size-3 [&_svg]:text-accent", className)}
       title="This data is produced by the DRIFTVEIL demo simulator, not a live system."
     >
       <FlaskConical /> {label}
@@ -146,7 +146,7 @@ export function SimTag({ className, label = "Simulated" }: { className?: string;
 }
 
 export function Mono({ children, className }: { children: ReactNode; className?: string }) {
-  return <span className={cn("font-mono text-[12px] tabular", className)}>{children}</span>;
+  return <span className={cn("font-mono text-xs tabular", className)}>{children}</span>;
 }
 
 export function Divider({ className }: { className?: string }) {

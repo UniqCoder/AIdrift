@@ -13,7 +13,7 @@ function Row({ label, hint, children, htmlFor }: { label: string; hint?: string;
   return (
     <div className="grid gap-2 px-4 py-3.5 sm:grid-cols-[1fr_auto] sm:items-center sm:gap-6">
       <div>
-        <label htmlFor={htmlFor} className="text-[13px] text-fg">{label}</label>
+        <label htmlFor={htmlFor} className="text-sm text-fg">{label}</label>
         {hint && <p className="text-xs text-muted">{hint}</p>}
       </div>
       <div>{children}</div>

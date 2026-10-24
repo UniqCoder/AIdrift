@@ -77,7 +77,7 @@ export default function Activity() {
               {filtered.length} events
             </span>
           </div>
-          <div className="hidden grid-cols-[64px_auto_minmax(0,1.2fr)_minmax(0,1fr)_auto_44px] gap-x-3 border-b border-border px-4 py-2 text-[11px] text-subtle md:grid">
+          <div className="hidden grid-cols-[64px_auto_minmax(0,1.2fr)_minmax(0,1fr)_auto_44px] gap-x-3 border-b border-border px-4 py-2 text-xs text-subtle md:grid">
             <span>Time</span>
             <span className="w-6" />
             <span>Action / agent</span>
@@ -148,8 +148,8 @@ export default function Activity() {
                     <span className="truncate text-muted">{agents.find((a) => a.id === s.agentId)?.name}</span>
                     <Badge tone="healthy" className="ml-auto">{s.outcome}</Badge>
                   </div>
-                  <div className="mt-1 truncate text-[13px]">{s.task}</div>
-                  <div className="mt-1 font-mono text-[11px] text-subtle">{s.steps} steps / {s.durationS}s / peak {s.peakRisk}</div>
+                  <div className="mt-1 truncate text-sm">{s.task}</div>
+                  <div className="mt-1 font-mono text-xs text-subtle">{s.steps} steps / {s.durationS}s / peak {s.peakRisk}</div>
                 </li>
               ))}
             </ul>

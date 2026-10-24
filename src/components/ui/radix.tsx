@@ -63,7 +63,7 @@ export function TabsTrigger({ value, children }: { value: string; children: Reac
   return (
     <TabsP.Trigger
       value={value}
-      className="relative -mb-px flex h-9 items-center gap-1.5 border-b-2 border-transparent px-3 text-[13px] text-muted transition-colors hover:text-fg data-[state=active]:border-accent data-[state=active]:text-fg [&_svg]:size-3.5"
+      className="relative -mb-px flex h-9 items-center gap-1.5 border-b-2 border-transparent px-3 text-sm text-muted transition-colors hover:text-fg data-[state=active]:border-accent data-[state=active]:text-fg [&_svg]:size-3.5"
     >
       {children}
     </TabsP.Trigger>
@@ -111,7 +111,7 @@ export function Select({
       <SelectP.Trigger
         aria-label={ariaLabel}
         className={cn(
-          "inline-flex h-8 min-w-0 items-center justify-between gap-2 rounded-md border border-border bg-bg px-2.5 text-[13px] text-fg hover:border-border-strong focus:border-accent focus:outline-none",
+          "inline-flex h-8 min-w-0 items-center justify-between gap-2 rounded-md border border-border bg-bg px-2.5 text-sm text-fg hover:border-border-strong focus:border-accent focus:outline-none",
           className,
         )}
       >
@@ -127,7 +127,7 @@ export function Select({
               <SelectP.Item
                 key={o.value}
                 value={o.value}
-                className="relative flex h-7 cursor-default select-none items-center rounded pl-7 pr-2 text-[13px] text-fg outline-none data-[highlighted]:bg-hover"
+                className="relative flex h-7 cursor-default select-none items-center rounded pl-7 pr-2 text-sm text-fg outline-none data-[highlighted]:bg-hover"
               >
                 <SelectP.ItemIndicator className="absolute left-2">
                   <Check className="size-3.5 text-accent" />
@@ -181,7 +181,7 @@ export function Dropdown({ trigger, items, align = "end" }: { trigger: ReactNode
               key={it.label}
               onSelect={it.onSelect}
               className={cn(
-                "flex h-7 cursor-default items-center gap-2 rounded px-2 text-[13px] outline-none data-[highlighted]:bg-hover [&_svg]:size-3.5",
+                "flex h-7 cursor-default items-center gap-2 rounded px-2 text-sm outline-none data-[highlighted]:bg-hover [&_svg]:size-3.5",
                 it.tone === "critical" ? "text-critical" : "text-fg",
               )}
             >

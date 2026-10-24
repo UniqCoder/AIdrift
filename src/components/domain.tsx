@@ -96,7 +96,7 @@ export function AnimatedNumber({ value, className }: { value: number; className?
 export function RiskPill({ score, className }: { score: number; className?: string }) {
   const tone = riskTone(score);
   return (
-    <span className={cn("inline-flex items-center gap-1.5 font-mono text-[12px] tabular", toneText[tone], className)}>
+    <span className={cn("inline-flex items-center gap-1.5 font-mono text-xs tabular", toneText[tone], className)}>
       <span className="relative h-1.5 w-8 overflow-hidden rounded-full bg-elevated">
         <span className={cn("absolute inset-y-0 left-0 rounded-full", toneBg[tone])} style={{ width: `${score}%` }} />
       </span>
@@ -158,7 +158,7 @@ export function RiskGauge({ score, size = 168, label: lbl = "Risk score" }: { sc
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <AnimatedNumber value={score} className={cn("text-[40px] font-semibold leading-none tracking-[-0.04em]", toneText[tone])} />
-        <span className="mt-1.5 font-mono text-[10px] uppercase tracking-[0.14em] text-subtle">{BAND_META[bandFor(score)].label}</span>
+        <span className="mt-1.5 font-mono text-[12px] uppercase tracking-[0.14em] text-subtle">{BAND_META[bandFor(score)].label}</span>
       </div>
     </div>
   );
@@ -174,7 +174,7 @@ export function SignalBreakdown({ signals, compact }: { signals: Partial<Signals
         <Tip key={c.key} content={`${SIGNAL_META[c.key].hint}. Weight ${SIGNAL_META[c.key].weight}, signal ${c.value.toFixed(2)}`}>
           <div className="grid grid-cols-[1fr_auto] items-center gap-x-3 gap-y-1">
             <span className="truncate text-xs text-muted">{c.label}</span>
-            <span className="font-mono text-[11px] tabular text-fg">{(c.weighted * 100).toFixed(0)}</span>
+            <span className="font-mono text-xs tabular text-fg">{(c.weighted * 100).toFixed(0)}</span>
             <div className="col-span-2 h-1 overflow-hidden rounded-full bg-elevated">
               <motion.div
                 className="h-full rounded-full"
@@ -188,7 +188,7 @@ export function SignalBreakdown({ signals, compact }: { signals: Partial<Signals
         </Tip>
       ))}
       {br.floor && (
-        <p className="pt-1 text-[11px] text-warning">
+        <p className="pt-1 text-xs text-warning">
           Policy floor applied: {br.floor.reason} ({br.floor.value})
         </p>
       )}
@@ -208,7 +208,7 @@ export function AgentMark({ agentId, size = "md" }: { agentId: string; size?: "s
   const agent = useStore((s) => s.agents.find((a) => a.id === agentId));
   const initials = agent?.name.split(" ").map((w) => w[0]).slice(0, 2).join("") ?? "?";
   const tone = agent ? statusTone[agent.status] : "neutral";
-  const dims = size === "sm" ? "size-6 text-[10px]" : size === "lg" ? "size-11 text-sm" : "size-8 text-[11px]";
+  const dims = size === "sm" ? "size-6 text-[12px]" : size === "lg" ? "size-11 text-sm" : "size-8 text-xs";
   return (
     <span className={cn("relative grid shrink-0 place-items-center rounded-md border border-border bg-elevated font-semibold text-fg", dims)}>
       {initials}
@@ -224,8 +224,8 @@ export function AgentLink({ agentId, showRole }: { agentId: string; showRole?: b
     <Link to={`/agents/${agent.id}`} className="group inline-flex min-w-0 items-center gap-2" onClick={(e) => e.stopPropagation()}>
       <AgentMark agentId={agentId} size="sm" />
       <span className="min-w-0">
-        <span className="block truncate text-[13px] text-fg group-hover:text-accent">{agent.name}</span>
-        {showRole && <span className="block truncate text-[11px] text-muted">{agent.role}</span>}
+        <span className="block truncate text-sm text-fg group-hover:text-accent">{agent.name}</span>
+        {showRole && <span className="block truncate text-xs text-muted">{agent.role}</span>}
       </span>
     </Link>
   );
@@ -245,10 +245,10 @@ export function PageHeader({ title, description, actions, meta }: { title: strin
     <div className="flex flex-col gap-4 pb-7 md:flex-row md:items-end md:justify-between">
       <div className="min-w-0">
         <div className="flex flex-wrap items-center gap-2.5">
-          <h1 className="text-[26px] font-semibold leading-tight tracking-[-0.025em] text-fg">{title}</h1>
+          <h1 className="text-[30px] font-semibold leading-tight tracking-[-0.025em] text-fg">{title}</h1>
           {meta}
         </div>
-        {description && <p className="mt-1.5 max-w-[68ch] text-[13.5px] leading-relaxed text-muted">{description}</p>}
+        {description && <p className="mt-2 max-w-[62ch] text-base leading-relaxed text-muted">{description}</p>}
       </div>
       {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}
     </div>
@@ -263,7 +263,7 @@ export function Stat({ label: l, value, sub, tone = "neutral", icon }: { label: 
         {l}
       </div>
       <div className={cn("mt-1.5 text-2xl font-semibold tracking-tight tabular", tone === "neutral" ? "text-fg" : toneText[tone])}>{value}</div>
-      {sub && <div className="mt-0.5 truncate text-[11px] text-muted">{sub}</div>}
+      {sub && <div className="mt-0.5 truncate text-xs text-muted">{sub}</div>}
     </div>
   );
 }

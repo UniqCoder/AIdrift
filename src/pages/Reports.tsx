@@ -1,4 +1,4 @@
-import { incidentTitle } from "@/lib/simulation";
+import { incidentTitle, PROOF_NAMES } from "@/lib/simulation";
 import { useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { FileJson, FileSpreadsheet, Printer } from "lucide-react";
@@ -31,7 +31,7 @@ export default function Reports() {
   if (kind === "computed") return <div className="space-y-5">
     <PageHeader title="Evidence & reports" description="Your saved runs, decisions and evidence in one place." actions={<Button variant="primary" disabled={!proofRuns.length} onClick={() => downloadFile("driftveil-computed-report.json", JSON.stringify({ generatedAt: new Date().toISOString(), synthetic: true, evidenceType: "computed", runs: proofRuns, incidents: incidents.filter(i => i.computed), evaluation }, null, 2))}><FileJson />Export computed evidence</Button>} />
     <details className="text-sm"><summary className="cursor-pointer text-muted">Results by feature</summary><div className="mt-4"><ProofSummary /></div></details>
-    <Panel className="divide-y divide-border">{proofRuns.length ? proofRuns.map(run => <div key={run.id} className="flex flex-wrap items-center justify-between gap-3 p-4"><div className="min-w-0"><p className="text-sm font-medium">{run.summary}</p><p className="mt-1 text-xs text-muted">{fmtDateTime(run.at)} · {run.engine} · {run.workflowId ? `case ${run.workflowId.slice(0, 8)}` : "advanced lab"}</p></div><div className="flex flex-wrap gap-2"><Link className={buttonVariants({ size: "sm" })} to={`/lab?tab=${run.kind}&run=${run.id}`}>Inspect snapshot</Link>{incidents.some(i => i.id === `DV-${run.id.slice(0, 8)}`) && <Link className={buttonVariants({ size: "sm" })} to={`/reports?incident=DV-${run.id.slice(0, 8)}`}>Incident report</Link>}</div></div>) : <div className="space-y-3 p-6"><p className="text-sm text-muted">No computed evidence yet. Run a task to generate an inspectable report.</p><Link className={buttonVariants({ variant: "primary" })} to="/demo">Start the guided workflow</Link></div>}</Panel>
+    <Panel className="divide-y divide-border">{proofRuns.length ? proofRuns.map(run => <div key={run.id} className="flex flex-wrap items-center justify-between gap-4 p-5"><div className="min-w-0 flex-1"><p className="text-base font-semibold">{PROOF_NAMES[run.kind]}</p><p className="mt-1 text-sm text-muted">{run.effects.filter(e => e.status === 'held').length} held · {run.effects.filter(e => e.status === 'committed').length} completed · {fmtDateTime(run.at)}</p><details className="mt-2 text-sm"><summary className="cursor-pointer text-accent">Decision summary</summary><p className="mt-3 leading-relaxed text-muted">{run.summary}</p><p className="mt-2 text-xs text-muted">{run.engine} · {run.workflowId ? `case ${run.workflowId.slice(0, 8)}` : "advanced lab"}</p></details></div><div className="flex flex-wrap gap-2"><Link className={buttonVariants({ size: "sm" })} to={`/lab?tab=${run.kind}&run=${run.id}`}>Inspect snapshot</Link>{incidents.some(i => i.id === `DV-${run.id.slice(0, 8)}`) && <Link className={buttonVariants({ size: "sm" })} to={`/reports?incident=DV-${run.id.slice(0, 8)}`}>Incident report</Link>}</div></div>) : <div className="space-y-3 p-6"><p className="text-sm text-muted">No computed evidence yet. Run a task to generate an inspectable report.</p><Link className={buttonVariants({ variant: "primary" })} to="/demo">Start the guided workflow</Link></div>}</Panel>
     <p className="text-xs text-muted">Synthetic evidence from local mock execution. Run ledgers are separate sandboxes. No production effectiveness or compliance certification is established. <Link className="text-accent hover:underline" to="/demo?step=5">Return to workflow completion</Link></p>
     <details className="text-xs text-muted"><summary className="cursor-pointer">Illustrative reporting layout</summary><Link className="mt-3 inline-block text-accent hover:underline" to="/reports?type=compliance">Open fixture fleet report</Link></details>
   </div>;
@@ -79,14 +79,14 @@ export default function Reports() {
 
       <Panel className="print-only-surface mx-auto max-w-[860px]">
         <PanelHeader className="no-print" title="Preview" actions={<Badge tone="accent">Simulated data</Badge>} />
-        <article className="space-y-6 p-6 text-[13px] leading-relaxed md:p-10">
+        <article className="space-y-6 p-6 text-sm leading-relaxed md:p-10">
           <header className="flex items-start justify-between gap-4 border-b border-border pb-5">
             <div>
-              <div className="text-[11px] font-semibold tracking-[0.16em] text-accent">DRIFTVEIL</div>
+              <div className="text-xs font-semibold tracking-[0.16em] text-accent">DRIFTVEIL</div>
               <h2 className="mt-1 text-lg font-semibold">{kind === "incident" ? `Incident report: ${incident.id}` : "Agent fleet compliance summary"}</h2>
               <p className="text-xs text-muted">{ORG.name} / tenant {ORG.tenant} / generated {generated} by {analyst}</p>
             </div>
-            <span className="rounded border border-border px-2 py-1 text-[10px] text-muted">{kind === "incident" ? incident.computed ? "COMPUTED SYNTHETIC" : "ILLUSTRATIVE FIXTURE" : "SYNTHETIC: MIXED EVIDENCE"}</span>
+            <span className="rounded border border-border px-2 py-1 text-[12px] text-muted">{kind === "incident" ? incident.computed ? "COMPUTED SYNTHETIC" : "ILLUSTRATIVE FIXTURE" : "SYNTHETIC: MIXED EVIDENCE"}</span>
           </header>
 
           {kind === "incident" ? (
@@ -140,7 +140,7 @@ export default function Reports() {
                     <li key={r.label}>{r.label} {r.name}: flagged action reproduced in {r.actionReproduced} of 3 runs</li>
                   ))}
                 </ul>
-                <p className="mt-2 text-[11px] text-muted">Replay results are diagnostic evidence and do not establish causality on their own.</p>
+                <p className="mt-2 text-xs text-muted">Replay results are diagnostic evidence and do not establish causality on their own.</p>
               </section>
               <section>
                 <h3 className="mb-2 text-sm font-semibold">Evidence chain</h3>
@@ -207,7 +207,7 @@ export default function Reports() {
               </section>
             </>
           )}
-          <footer className="border-t border-border pt-4 text-[11px] text-muted">
+          <footer className="border-t border-border pt-4 text-xs text-muted">
             Generated from the DRIFTVEIL demonstration environment. All agents, events and incidents are simulated. Risk scores are explainable heuristics, not calibrated probabilities.
           </footer>
         </article>

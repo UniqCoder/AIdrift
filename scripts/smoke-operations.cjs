@@ -39,6 +39,10 @@ async function main() {
     await evaluate(`(() => { const l = [...document.querySelectorAll('.operations label')].find(l => l.textContent.includes(${JSON.stringify(text)})); if (!l) throw Error('Missing checkbox'); l.querySelector('input[type=checkbox]').click(); })()`);
     await pause(100);
   };
+  const disclose = async text => {
+    await evaluate(`(() => { const summary = [...document.querySelectorAll('summary')].find(s => s.textContent.trim() === ${JSON.stringify(text)}); if (!summary) throw Error('Missing disclosure'); if (!summary.parentElement.open) summary.click(); })()`);
+    await pause(100);
+  };
   const state = () => evaluate("JSON.parse(localStorage.getItem('driftveil-demo-v2')).state");
   const run = async button => {
     const before = (await state()).proofRuns.length;
@@ -68,7 +72,8 @@ async function main() {
       await waitFor(`location.pathname === '${route}' && document.querySelector('main h1')`);
       await pause(150);
     }
-    assert.ok(await evaluate("parseFloat(getComputedStyle(document.querySelector('.op-body') || document.querySelector('.op-activity p')).fontSize) >= 12"), 'Readable operational body text');
+    assert.ok(await evaluate("parseFloat(getComputedStyle(document.querySelector('.op-body') || document.querySelector('.op-activity p')).fontSize) >= 16"), 'Readable operational body text');
+    assert.ok(await evaluate("document.querySelector('.op-control-grid').getBoundingClientRect().top < document.querySelector('.op-overview-grid').getBoundingClientRect().top"), 'Core controls precede the detailed topology');
     await evaluate("document.querySelector('button[aria-label=\"Search\"]').click()");
     await waitFor("document.querySelector('[role=\"dialog\"] input[aria-label=\"Search\"]')");
     await send('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Escape', code: 'Escape', windowsVirtualKeyCode: 27 });
@@ -104,6 +109,7 @@ async function main() {
     await field('Actual scheduling destination', 'external.example'); result = await run('Evaluate change & actions');
     assert.deepEqual(result.effects.map(e => e.status), ['held', 'held']);
     await field('Actual scheduling destination', 'finance.internal');
+    await disclose('Behavior reference & learning');
     await click('Collect & validate reference');
     await waitFor("JSON.parse(localStorage.getItem('driftveil-demo-v2')).state.demo.changeReference !== null");
     await screenshot('change-desktop');
@@ -120,6 +126,8 @@ async function main() {
     assert.equal(result.effects.some(e => e.actionId === 'payment-repaired' && e.status === 'committed'), false);
     assert.ok(await evaluate("document.querySelector('.op-node-buttons').innerText.includes('finance-memory')"));
     await click('OutcomeGuard'); await click('Lowest cost');
+    assert.equal(await evaluate("[...document.querySelectorAll('summary')].find(s => s.textContent === 'Document misuse test').parentElement.open"), false);
+    await disclose('Document misuse test');
     await checkbox('Include document-derived salary-read proposal');
     result = await run('Evaluate document proposal & purchase');
     assert.equal(result.effects.find(e => e.tool === 'hr.salary.read').status, 'held');
@@ -129,6 +137,10 @@ async function main() {
     await click('Evidence'); await click('Run evaluation suite');
     await waitFor("document.querySelector('.op-evaluation')");
     assert.deepEqual((await state()).evaluation.failures, []);
+    assert.equal(await evaluate("[...document.querySelectorAll('summary')].find(s => s.textContent === 'Compare security controls').parentElement.open"), false);
+    await disclose('Control coverage & limits');
+    await disclose('Compare security controls');
+    await disclose('Dependency workload measurements');
     assert.ok(await evaluate("document.body.innerText.includes('Security controls & evidence') && document.body.innerText.includes('Task rules + learned history') && document.body.innerText.includes('Bounded dependency workload')"));
     assert.equal((await state()).evaluation.graphWorkloads.every(row => row.correct), true);
     await send('Browser.setDownloadBehavior', { behavior: 'allow', downloadPath: output });

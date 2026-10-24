@@ -19,6 +19,8 @@ For presentation evidence, open **Evidence** to see the claim-to-control map, th
 
 ## Operations console
 
+Core controls appear before detailed topology. Feature workspaces put inputs, execution and saved results first; history, additional tests and technical comparisons expand on demand. Reports lead with the feature and held/completed counts. Shared typography and controls are larger across the working routes; mobile layouts prioritize actionable controls.
+
 The application uses persistent horizontal navigation for Security operations, Activity, Findings, Reports, Task workspace, Advanced lab and Settings. On smaller screens the same navigation scrolls horizontally; there is no sidebar or illustrative-workspace launcher. Operational body text and labels use a larger, higher-contrast type scale.
 
 The default interface is an operational system with directly accessible Overview, OutcomeGuard, DriftGate, ChainRestore and Evidence workspaces. It uses the existing shared engine and optional API; it introduces no scripted verdicts. Edit offers and task constraints, execute proposed actions, manage exact change scope, recall/rebuild dependent state and export the saved case. The 3D graph visualizes the latest recovery snapshot or a labeled draft preview, supports node inspection and has an accessible list/failure fallback. Stale results retain their original evidence.
