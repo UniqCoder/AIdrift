@@ -129,7 +129,7 @@ async function main() {
     await click('Evidence'); await click('Run evaluation suite');
     await waitFor("document.querySelector('.op-evaluation')");
     assert.deepEqual((await state()).evaluation.failures, []);
-    assert.ok(await evaluate("document.body.innerText.includes('What this prototype demonstrates') && document.body.innerText.includes('Task rules + learned history') && document.body.innerText.includes('Bounded dependency workload')"));
+    assert.ok(await evaluate("document.body.innerText.includes('Security controls & evidence') && document.body.innerText.includes('Task rules + learned history') && document.body.innerText.includes('Bounded dependency workload')"));
     assert.equal((await state()).evaluation.graphWorkloads.every(row => row.correct), true);
     await send('Browser.setDownloadBehavior', { behavior: 'allow', downloadPath: output });
     await click('Export evidence'); await pause(500);

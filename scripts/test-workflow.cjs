@@ -67,7 +67,7 @@ module.exports = () => {
     const snapshot = JSON.stringify(useStore.getState().proofRuns);
     const { evaluateSynthetic } = require('../src/lib/simulationEvaluation.ts');
     useStore.getState().setEvaluation(evaluateSynthetic());
-    assert.match(render(Operations, '/operations?view=evidence'), /What this prototype demonstrates/);
+    assert.match(render(Operations, '/operations?view=evidence'), /Security controls &amp; evidence/);
     const evidence = render(Operations, '/operations?view=evidence');
     for (const text of ['Task rules + learned history', 'Bounded dependency workload']) assert.ok(evidence.includes(text), text);
     useStore.getState().updateDemo({ documentAttack: true });

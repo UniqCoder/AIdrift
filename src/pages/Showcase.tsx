@@ -73,7 +73,7 @@ export default function Showcase() {
                 <ArrowLeft /> Back to app
               </Button>
             </Link>
-            <span className="text-xs text-muted">System preview artboard for slides. Press H to hide these controls before taking a screenshot.</span>
+            <span className="text-xs text-muted">DRIFTVEIL system preview. Press H to hide these controls.</span>
             <div className="ml-auto flex items-center gap-2">
               <Select ariaLabel="Aspect ratio" value={aspect} onValueChange={(v) => setAspect(v as Aspect)} className="w-28" options={Object.keys(ASPECTS).map((k) => ({ value: k, label: k }))} />
               <Button size="sm" variant="primary" onClick={() => setChrome(false)}>
