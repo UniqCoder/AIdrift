@@ -11,3 +11,7 @@ dist
 server/dist/
 artifacts/*
 !artifacts/synthetic-evaluation.json
+!artifacts/runtime-evaluation.json
+.vercel
+.env*
+server/data/

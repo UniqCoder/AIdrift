@@ -115,7 +115,7 @@ export interface Context {
   policyVersion: number; envelope: Envelope; outcome?: OutcomeInput; artifacts: Artifact[];
   reference: Reference | null; previousLosses: (number | null)[]; previousTool: string;
   changeReference?: Reference | null;
-  autoHold: boolean; reviewAt: number;
+  autoHold: boolean; reviewAt: number; session?: string;
 }
 export function changeFixture(): Envelope {
   return { id: "change-finance-v2", agent: "finance-agent", from: 1, to: 2, approved: true, effective: true,
@@ -192,7 +192,7 @@ export function assess(action: Action, ctx: Context): Assessment {
   const fingerprint = JSON.stringify({ action, ctx: { ...ctx, artifacts: ctx.artifacts.filter(a => dependencies.has(a.id)) } });
   const require = (ok: boolean, reason: string) => { if (!ok) mandatory.push(reason); };
   require(!!action.id && !!action.agent && !!action.session && action.task === (ctx.outcome?.task.id ?? "purchase-42"), "Missing or mismatched task/session authority.");
-  require(action.agent === ctx.agent && ["procurement-agent", "finance-agent"].includes(action.agent) && action.session === "session-42", "Agent/session is outside the mock execution authority.");
+  require(action.agent === ctx.agent && ["procurement-agent", "finance-agent"].includes(action.agent) && action.session === (ctx.session ?? "session-42"), "Agent/session is outside the mock execution authority.");
   require(action.credentialValid && action.receipt?.binding === binding(action) && action.receipt.policyVersion === ctx.policyVersion,
     "Credential/action reconciliation failed or policy receipt is stale.");
   if (!action.credentialValid || action.receipt?.binding !== binding(action)) signals.credentialMismatch = 1;

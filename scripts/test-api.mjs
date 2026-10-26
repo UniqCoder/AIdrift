@@ -7,8 +7,11 @@ const { createServer } = await import('../server/app.mjs');
 const { default: engine } = await import('../server/dist/simulation.cjs');
 
 let server; let base;
+const os = await import('node:os');
 before(async () => {
   process.env.FRONTEND_ORIGIN = 'https://judge.example';
+  process.env.DRIFTVEIL_DATA_DIR = fs.mkdtempSync(os.tmpdir() + '/driftveil-api-');
+  process.env.DRIFTVEIL_ADMIN_TOKEN = 'test-admin-token';
   server = createServer();
   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
   base = `http://127.0.0.1:${server.address().port}`;
@@ -107,4 +110,44 @@ test('frontend API client executes every workflow and surfaces server errors wit
   assert.ok((await client.reference(engine.changeFixture(), 'finance.internal', {}, input())).reference);
   assert.equal((await client.evaluation()).detected, 12);
   await assert.rejects(client.outcome({ task: {} }), /Invalid task or supplier/);
+});
+
+const rt = (op, body = {}, headers = {}) => fetch(`${base}/api/runtime/${op}`, { method: 'POST', headers: { 'Content-Type': 'application/json', ...headers }, body: JSON.stringify(body) })
+  .then(async r => ({ status: r.status, data: await r.json() }));
+test('runtime API: real PDF upload, persisted cross-agent state, admin-only approvals and recorded effects', async () => {
+  await rt('case.reset');
+  const pdf = fs.readFileSync('public/samples/poisoned-quote.pdf');
+  const doc = await rt('document.ingest', { name: 'poisoned-quote.pdf', base64: pdf.toString('base64'), text: 'client text is ignored', sha256: 'f'.repeat(64) });
+  assert.equal(doc.status, 200);
+  assert.equal(doc.data.trust, 'untrusted');
+  assert.match(doc.data.text, /hr\.salary\.read/, 'text is extracted on the server from the PDF bytes');
+  assert.equal(doc.data.sha256, (await import('node:crypto')).createHash('sha256').update(pdf).digest('hex'));
+  assert.equal((await rt('document.ingest', { name: 'x.pdf', base64: Buffer.from('not a pdf').toString('base64') })).status, 400);
+
+  const injected = await rt('workflow.run', { documents: [doc.data.id], procurement: { followDocumentDirectives: true }, finance: { action: 'prepare' }, plan: { model: 'forged', proposals: [] } });
+  assert.equal(injected.data.workflow.proposedBy, 'local-deterministic-agent', 'clients cannot inject model plans');
+  assert.equal(injected.data.steps.find(s => s.proposal.tool === 'hr.salary.read').effect.status, 'held');
+  assert.equal((await rt('workflow.run', { agentMode: 'llm' })).status, 400, 'LLM mode reports unavailable instead of pretending');
+
+  assert.equal((await rt('admin.approve', { agent: 'finance-agent', tool: 'payment.schedule', destination: 'finance.internal', taskFamily: 'standard', approvedBy: 'agent' })).status, 403);
+  assert.equal((await rt('admin.approve', { agent: 'finance-agent', tool: 'payment.schedule', destination: 'finance.internal', taskFamily: 'standard', approvedBy: 'demo-admin' }, { 'X-Driftveil-Admin': 'wrong-token-value' })).status, 403);
+  const approval = await rt('admin.approve', { agent: 'finance-agent', tool: 'payment.schedule', destination: 'finance.internal', taskFamily: 'standard', approvedBy: 'demo-admin' }, { 'X-Driftveil-Admin': 'test-admin-token' });
+  assert.equal(approval.status, 200);
+
+  const recall = await rt('source.recall', { sourceId: doc.data.id });
+  assert.deepEqual(recall.data.contained, [injected.data.workflow.finance.paymentActionId]);
+  const recovery = await rt('recovery.run', { runId: injected.data.workflow.runId });
+  assert.equal(recovery.data.status, 'verified');
+  const again = await rt('recovery.run', { runId: injected.data.workflow.runId });
+  assert.equal(again.data.status, 'verified-duplicate');
+
+  const state = await rt('state.get');
+  assert.equal(state.data.verified.valid, true);
+  assert.equal(state.data.ledger.filter(e => e.tool === 'payment.commit').length, 1);
+  assert.equal(state.data.ledger.some(e => e.tool === 'hr.salary.read'), false);
+  const onDisk = JSON.parse(fs.readFileSync(process.env.DRIFTVEIL_DATA_DIR + '/runtime.json', 'utf8'));
+  assert.deepEqual(onDisk.records.map(r => r.hash), state.data.records.map(r => r.hash), 'state persists between requests');
+  const exported = await rt('evidence.export');
+  assert.deepEqual(exported.data.records, state.data.records);
+  assert.equal((await rt('no.such.op')).status, 404);
 });

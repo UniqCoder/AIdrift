@@ -50,7 +50,7 @@ async function main() {
     await send('Runtime.enable'); await send('Page.enable');
     await send('Emulation.setDeviceMetricsOverride', { width: 1600, height: 1100, deviceScaleFactor: 1, mobile: false });
     await navigate('/');
-    await waitFor("location.pathname === '/operations'");
+    await waitFor("location.pathname === '/runtime'");
     await navigate('/demo');
     await evaluate("localStorage.removeItem('driftveil-demo-v2')");
     await send('Page.reload'); await pause(500);

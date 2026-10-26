@@ -210,3 +210,35 @@
 .operations .op-topology-wrap { flex-shrink: 0; }
 @media (max-width: 760px) { .op-overview-grid > .op-stack { order: -1; } .op-fold > summary { padding: 18px; } }
 @media (max-width: 420px) { .op-page-heading { gap: 14px; padding: 20px 0; } .op-page-heading .op-eyebrow, .op-section-heading .op-eyebrow, .op-case { display: none; } .op-tabs { margin: 12px 0 20px; } }
+
+/* Agent runtime console */
+.rt-explain { border: 1px solid var(--op-line); border-left: 3px solid var(--op-mint); border-radius: 10px; padding: 14px 18px; background: var(--surface); font-size: 15px; line-height: 1.7; }
+.rt-explain p { margin: 0; color: var(--muted); } .rt-explain p + p { margin-top: 6px; } .rt-explain b { color: var(--fg); font-weight: 500; }
+.rt-entries { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.rt-entry { text-align: left; cursor: pointer; transition: border-color .15s; } .rt-entry:hover, .rt-entry:focus-visible { border-color: var(--op-mint); }
+.rt-entry h2 { font-size: 18px; font-weight: 500; margin-bottom: 8px; } .rt-entry p { color: var(--muted); font-size: 15px; line-height: 1.7; margin: 0; }
+.rt-select { width: 100%; height: 38px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--fg); padding: 0 10px; font-size: 15px; }
+.rt-steps { display: flex; flex-direction: column; gap: 12px; }
+.rt-step { border: 1px solid var(--op-line); border-left: 3px solid var(--healthy); border-radius: 10px; padding: 14px 16px; background: var(--bg); }
+.rt-step.rt-hold { border-left-color: var(--critical); } .rt-step.rt-restrict { border-left-color: var(--warning); }
+.rt-step header { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
+.rt-step header small { display: block; color: var(--muted); font-size: 13px; } .rt-tool { font: 500 16px var(--font-mono); }
+.rt-badges { display: flex; gap: 6px; flex-wrap: wrap; align-items: start; }
+.rt-rationale { color: var(--muted); font-size: 14px; font-style: italic; margin: 0 0 8px; overflow-wrap: anywhere; }
+.rt-checks { display: flex; flex-wrap: wrap; gap: 6px 14px; list-style: none; padding: 0; margin: 0 0 10px; font-size: 14px; }
+.rt-checks span { font-weight: 700; margin-right: 5px; } .rt-ok span { color: var(--healthy); } .rt-bad { color: var(--critical); }
+.rt-outcome { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 16px; margin: 0 0 10px; font-size: 14px; }
+.rt-outcome dt { color: var(--muted); font-size: 13px; } .rt-outcome dd { margin: 0; font-family: var(--font-mono); }
+.rt-reasons { margin: 0 0 8px; padding-left: 18px; font-size: 14px; line-height: 1.6; }
+.rt-step footer { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; color: var(--muted); font: 12px var(--font-mono); }
+.rt-step pre, .rt-doc pre, .rt-json { white-space: pre-wrap; overflow-wrap: anywhere; font: 12px/1.6 var(--font-mono); background: var(--surface); border-radius: 6px; padding: 10px; max-height: 260px; overflow: auto; }
+.rt-toggle { display: flex; gap: 8px; align-items: center; font-size: 15px; margin: 8px 0; }
+.rt-upload { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; border: 1px dashed var(--border); border-radius: 8px; padding: 5px 10px; cursor: pointer; }
+.rt-upload svg { width: 14px; height: 14px; } .rt-upload input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.rt-upload:focus-within { outline: 2px solid var(--op-mint); }
+.rt-doc { border-top: 1px solid var(--op-line); padding: 10px 0; } .rt-doc summary { cursor: pointer; font-size: 15px; overflow-wrap: anywhere; } .rt-doc small { color: var(--muted); }
+.rt-recover { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--op-line); } .rt-recover small { color: var(--muted); }
+.rt-records { max-height: 460px; overflow: auto; }
+.rt-limits { margin: 0; padding-left: 18px; color: var(--muted); line-height: 1.8; font-size: 15px; }
+.rt-h3 { font-size: 16px; font-weight: 500; margin: 14px 0 4px; }
+@media (max-width: 900px) { .rt-entries, .rt-outcome { grid-template-columns: 1fr; } }

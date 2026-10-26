@@ -4,6 +4,35 @@ Lightweight hackathon proof of concept for the three USPs in the [authoritative 
 
 The enterprise, agent proposals and approvals are synthetic. The core validators, policy gates, graph traversal and mock executor run real TypeScript logic, either locally or through the optional Docker-packaged API. No hosted model, credentials or production integrations are required. See [DEPLOYMENT.md](DEPLOYMENT.md) for the Render/Vercel deployment path and current publication blockers.
 
+## Agent runtime (primary judge path) — 26 October 2026
+
+`/runtime` (the default route) runs bounded agents whose every tool call passes through one DRIFTVEIL gateway: **task → agent → structured proposal → gateway (shared `assess` engine) → allow / hold / restrict → sandbox effect ledger → hash-chained evidence**. Nothing is scripted: presets only fill inputs, and verdicts come from the recorded decisions. Claim-by-claim evidence and readiness status are in [PPT_CLAIM_EVIDENCE.md](PPT_CLAIM_EVIDENCE.md).
+
+- **Agents:** `procurement-agent` and `finance-agent` are *local deterministic agents*, not LLMs. Their objective, such as "preferred vendor at up to 50% premium", simulates a compromised agent, and the gateway never sees it. An optional Anthropic planner (`server/llm.mjs`, `DRIFTVEIL_LLM_PLANNER=anthropic` plus credentials) routes model tool calls through the same gateway. It has **not** been exercised in this environment.
+- **Tools:** `suppliers.read`, `vendor.purchase`, `payment.schedule`, `payment.commit`, `hr.salary.read`, `bank.export`. All of them are sandbox-only, over synthetic tables.
+- **Approvals:** created only through admin operations. In API mode they need the `X-Driftveil-Admin` token (`DRIFTVEIL_ADMIN_TOKEN`, default `demo-admin`, which is a demo control, not enterprise authentication).
+- **State:** in API mode, one JSON document under `server/data/` (`DRIFTVEIL_DATA_DIR`), written atomically. In browser mode, `localStorage` key `driftveil-runtime-v1`.
+- **PDFs:** extracted with pdf.js via `unpdf` and always marked untrusted. `npm run samples` regenerates the two synthetic PDFs in `public/samples/`.
+
+Judge walkthrough (about 5 minutes, works in either mode):
+
+1. **OutcomeGuard:** run preset A (commits), B (30% unjustified gap held while credentials and tool access are valid), and C (urgent premium supplier commits). Then **Run drift windows**: the first restriction lands at window 4. Edit any price or constraint and rerun.
+2. **DriftGate:** run the workflow with no approval (schedule held). **Grant scoped approval**, then run (schedule commits, `bank.export` held). Revoke, expire, or change the destination or task family, then run again (held).
+3. **ChainRestore:** load the poisoned sample PDF → **Run with selected documents** (the salary read is proposed from the document and held; the purchase continues) → **Run independent workflow** → recall the PDF → **Commit queued payments** (contaminated held, independent committed) → **Recover** (verified, one fresh payment) → **Recover** again (duplicate, no effect). With "loses provenance" checked, recovery is UNRESOLVED.
+4. **Evidence:** download the case, verify the file (editing any record breaks the chain), and **Run evaluation** for baselines A/B/C plus bounded timings.
+
+Commands:
+
+```sh
+npm install
+npm run dev                      # browser mode: http://localhost:5173/runtime
+npm run build:api && npm run start:api   # API on :10000; run `VITE_API_BASE=/api npm run dev` for server mode
+npm test                         # 33 engine checks + runtime acceptance tests A–N, writes artifacts/runtime-evaluation.json
+npm run test:api                 # HTTP tests incl. PDF upload, admin token, persistence
+npm run build
+node scripts/smoke-runtime.cjs   # optional: needs an isolated Chrome on port 9223 and the dev server
+```
+
 ## Run and verify
 
 ```sh

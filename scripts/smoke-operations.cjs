@@ -60,7 +60,7 @@ async function main() {
   try {
     await send('Page.enable'); await send('Page.navigate', { url: 'about:blank' }); await pause(200); await send('Runtime.enable');
     await send('Emulation.setDeviceMetricsOverride', { width: 1600, height: 1150, deviceScaleFactor: 1, mobile: false });
-    await send('Page.navigate', { url: base });
+    await send('Page.navigate', { url: new URL('/operations', base).href });
     await waitFor("location.pathname === '/operations' && document.querySelector('.operations h1')");
     await evaluate("localStorage.removeItem('driftveil-demo-v2')"); await send('Page.reload'); await pause(600);
     await waitFor("document.querySelector('.operations h1')");

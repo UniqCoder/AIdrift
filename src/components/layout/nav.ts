@@ -31,6 +31,7 @@ export interface NavItem {
 
 export const NAV: { group: string; items: NavItem[] }[] = [
   { group: "Operations", items: [
+    { to: "/runtime", label: "Agent runtime", icon: Bot },
     { to: "/operations", label: "Security operations", icon: LayoutDashboard },
     { to: "/activity", label: "Activity", icon: Activity },
     { to: "/incidents", label: "Findings", icon: ShieldAlert },

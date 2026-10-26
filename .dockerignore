@@ -11,3 +11,4 @@ archive
 *.log
 *.tsbuildinfo
 .DS_Store
+server/data/

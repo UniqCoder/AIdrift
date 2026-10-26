@@ -26,6 +26,7 @@ const Integrations = lazy(() => import("./pages/Integrations"));
 const Settings = lazy(() => import("./pages/Settings"));
 const Showcase = lazy(() => import("./pages/Showcase"));
 const Operations = lazy(() => import("./pages/Operations"));
+const Runtime = lazy(() => import("./pages/Runtime"));
 
 const router = createBrowserRouter([
   {
@@ -41,7 +42,8 @@ const router = createBrowserRouter([
     element: <AppShell />,
     errorElement: <RouteError />,
     children: [
-      { index: true, element: <Navigate to="/operations" replace /> },
+      { index: true, element: <Navigate to="/runtime" replace /> },
+      { path: "runtime", element: <Runtime /> },
       { path: "operations", element: <Operations /> },
       { path: "demo", element: <Demo /> },
       { path: "dashboard", element: <Dashboard /> },
