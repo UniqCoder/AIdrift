@@ -9,28 +9,51 @@ import os from 'node:os';
 import path from 'node:path';
 import { llmEnabled, llmModel, llmPlan } from './llm.mjs';
 
-// Runtime state persists as one JSON document per case, written atomically (temp file + rename).
-// Each browser sends its own random X-Driftveil-Case key, so concurrent visitors never share or reset each other's case.
-// ponytail: single-process, serialized requests; move to SQLite if several API instances share state.
+// Runtime state persists as one JSON document per case. Each browser sends its own random X-Driftveil-Case key,
+// so concurrent visitors never share or reset each other's case. Storage: Postgres when DATABASE_URL is set
+// (Render Postgres in production, the local DRIFTviel container in development), otherwise atomic JSON files.
+// ponytail: single-process, serialized requests; one row/file per case; newest MAX_CASES kept.
 const dataDir = () => process.env.DRIFTVEIL_DATA_DIR || path.join(import.meta.dirname, 'data');
 const MAX_CASES = 500;
-function caseFile(headers) {
+export const storageKind = () => process.env.DATABASE_URL ? 'postgres' : 'file';
+function caseKey(headers) {
   const key = headers['x-driftveil-case'];
-  if (key === undefined) return path.join(dataDir(), 'runtime.json');
+  if (key === undefined) return 'default';
   if (typeof key !== 'string' || !/^[a-z0-9-]{16,64}$/.test(key)) throw invalid('Invalid case key.');
-  return path.join(dataDir(), 'cases', `${key}.json`);
+  return key;
 }
+const caseFile = key => key === 'default' ? path.join(dataDir(), 'runtime.json') : path.join(dataDir(), 'cases', `${key}.json`);
+let pool;
+async function db() {
+  if (pool) return pool;
+  const { default: pg } = await import('pg');
+  const next = new pg.Pool({ connectionString: process.env.DATABASE_URL, max: 4 });
+  // json (not jsonb) keeps key order exactly, which the evidence hash chain depends on.
+  await next.query('CREATE TABLE IF NOT EXISTS runtime_cases (case_key text PRIMARY KEY, state json NOT NULL, updated_at timestamptz NOT NULL DEFAULT now())');
+  return (pool = next);
+}
+export async function closeStore() { await pool?.end(); pool = undefined; }
 const adminToken = () => process.env.DRIFTVEIL_ADMIN_TOKEN || 'demo-admin';
-function loadState(file) {
-  try { return JSON.parse(fs.readFileSync(file, 'utf8')); }
+async function loadState(key) {
+  if (storageKind() === 'postgres') {
+    const { rows } = await (await db()).query('SELECT state FROM runtime_cases WHERE case_key = $1', [key]);
+    return rows[0]?.state ?? runtime.initialState(Date.now());
+  }
+  try { return JSON.parse(fs.readFileSync(caseFile(key), 'utf8')); }
   catch (error) { if (error.code !== 'ENOENT') throw error; return runtime.initialState(Date.now()); }
 }
-function saveState(file, state) {
+async function saveState(key, state) {
+  if (storageKind() === 'postgres') {
+    const client = await db();
+    await client.query('INSERT INTO runtime_cases (case_key, state, updated_at) VALUES ($1, $2, now()) ON CONFLICT (case_key) DO UPDATE SET state = EXCLUDED.state, updated_at = now()', [key, JSON.stringify(state)]);
+    await client.query("DELETE FROM runtime_cases WHERE case_key <> 'default' AND case_key NOT IN (SELECT case_key FROM runtime_cases ORDER BY updated_at DESC LIMIT $1)", [MAX_CASES]);
+    return;
+  }
+  const file = caseFile(key);
   fs.mkdirSync(path.dirname(file), { recursive: true });
   const tmp = `${file}.${process.pid}.tmp`;
   fs.writeFileSync(tmp, JSON.stringify(state));
   fs.renameSync(tmp, file);
-  // ponytail: evict least recently written cases past MAX_CASES; an O(n) directory scan per write is fine at demo scale.
   const dir = path.dirname(file);
   if (path.basename(dir) !== 'cases') return;
   const cases = fs.readdirSync(dir).filter(n => n.endsWith('.json')).map(n => ({ n, t: fs.statSync(path.join(dir, n)).mtimeMs }));
@@ -44,8 +67,8 @@ export function runtimeRequest(op, body, headers = {}) {
     if (op === 'evaluation') return runtimeEvaluation.evaluateRuntime(`Node ${process.version}, ${os.platform()} ${os.arch()}, ${os.cpus()[0]?.model ?? 'unknown CPU'}`);
     const admin = typeof headers['x-driftveil-admin'] === 'string' && headers['x-driftveil-admin'].length === adminToken().length &&
       crypto.timingSafeEqual(Buffer.from(headers['x-driftveil-admin']), Buffer.from(adminToken()));
-    const file = caseFile(headers);
-    const state = loadState(file);
+    const key = caseKey(headers);
+    const state = await loadState(key);
     const input = { ...body }; delete input.plan; delete input.text; delete input.sha256; // Never accepted from clients.
     let plan = null;
     if (op === 'document.ingest') {
@@ -66,7 +89,7 @@ export function runtimeRequest(op, body, headers = {}) {
     }
     delete input.agentMode;
     const { state: next, result } = runtime.handleRuntime(state, op, input, { now: Date.now(), admin, plan });
-    if (op !== 'state.get' && op !== 'evidence.export') saveState(file, next);
+    if (op !== 'state.get' && op !== 'evidence.export') await saveState(key, next);
     return result;
   });
 }
@@ -156,7 +179,7 @@ export function createServer() {
       }
       const path = new URL(req.url, 'http://localhost').pathname;
       if (req.method === 'GET' && ['/health', '/api/health'].includes(path)) return send(200, { status: 'ok', service: 'driftveil-api', engine: engine.ENGINE_VERSION, runtime: runtime.RUNTIME_VERSION, synthetic: true, usps: engine.PROOF_NAMES,
-        agent: llmEnabled() ? `llm:${llmModel()}` : runtime.LOCAL_AGENT, adminAuth: process.env.DRIFTVEIL_ADMIN_TOKEN ? 'configured token' : 'demo token (not enterprise authentication)' });
+        agent: llmEnabled() ? `llm:${llmModel()}` : runtime.LOCAL_AGENT, storage: storageKind(), adminAuth: process.env.DRIFTVEIL_ADMIN_TOKEN ? 'configured token' : 'demo token (not enterprise authentication)' });
       const runtimeOp = path.match(/^\/api\/runtime\/([a-z.]+)$/)?.[1];
       if (runtimeOp) {
         if (![...runtime.RUNTIME_OPS, 'evaluation'].includes(runtimeOp)) return send(404, { error: 'Unknown runtime operation.' });

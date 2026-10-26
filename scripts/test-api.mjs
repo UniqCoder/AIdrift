@@ -16,7 +16,7 @@ before(async () => {
   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
   base = `http://127.0.0.1:${server.address().port}`;
 });
-after(async () => { server.closeAllConnections(); await new Promise(resolve => server.close(resolve)); });
+after(async () => { server.closeAllConnections(); await new Promise(resolve => server.close(resolve)); await (await import('../server/app.mjs')).closeStore(); });
 const input = () => ({ ...engine.outcomeFixture(), selected: 'atlas' });
 const post = async (path, body) => {
   const response = await fetch(base + path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
@@ -145,8 +145,10 @@ test('runtime API: real PDF upload, persisted cross-agent state, admin-only appr
   assert.equal(state.data.verified.valid, true);
   assert.equal(state.data.ledger.filter(e => e.tool === 'payment.commit').length, 1);
   assert.equal(state.data.ledger.some(e => e.tool === 'hr.salary.read'), false);
-  const onDisk = JSON.parse(fs.readFileSync(process.env.DRIFTVEIL_DATA_DIR + '/runtime.json', 'utf8'));
-  assert.deepEqual(onDisk.records.map(r => r.hash), state.data.records.map(r => r.hash), 'state persists between requests');
+  if (!process.env.DATABASE_URL) {
+    const onDisk = JSON.parse(fs.readFileSync(process.env.DRIFTVEIL_DATA_DIR + '/runtime.json', 'utf8'));
+    assert.deepEqual(onDisk.records.map(r => r.hash), state.data.records.map(r => r.hash), 'state persists between requests');
+  }
   const exported = await rt('evidence.export');
   assert.deepEqual(exported.data.records, state.data.records);
   assert.equal((await rt('no.such.op')).status, 404);
@@ -155,6 +157,7 @@ test('runtime API: real PDF upload, persisted cross-agent state, admin-only appr
 test('runtime API: each case key gets an isolated case; reset in one never touches another', async () => {
   const a = { 'X-Driftveil-Case': 'aaaaaaaa-1111-2222-3333-444444444444' };
   const b = { 'X-Driftveil-Case': 'bbbbbbbb-1111-2222-3333-444444444444' };
+  await rt('case.reset', {}, a); await rt('case.reset', {}, b); // Postgres keeps cases between test runs.
   await rt('workflow.run', {}, a);
   assert.equal((await rt('state.get', {}, a)).data.ledger.length, 2);
   assert.equal((await rt('state.get', {}, b)).data.ledger.length, 0, 'case B does not see case A');
@@ -164,5 +167,15 @@ test('runtime API: each case key gets an isolated case; reset in one never touch
   assert.equal((await rt('admin.approve', { agent: 'finance-agent', tool: 'payment.schedule', destination: 'finance.internal', taskFamily: 'standard', approvedBy: 'demo-admin' }, { ...a, 'X-Driftveil-Admin': 'test-admin-token' })).status, 200);
   assert.equal((await rt('state.get', {}, b)).data.approvals.length, 0, 'approvals are per case');
   assert.equal((await rt('state.get', {}, { 'X-Driftveil-Case': '../../etc/passwd' })).status, 400);
-  assert.ok(fs.existsSync(process.env.DRIFTVEIL_DATA_DIR + '/cases/aaaaaaaa-1111-2222-3333-444444444444.json'));
+  if (!process.env.DATABASE_URL) assert.ok(fs.existsSync(process.env.DRIFTVEIL_DATA_DIR + '/cases/aaaaaaaa-1111-2222-3333-444444444444.json'));
+});
+
+test('stored cases survive a store reconnect with a valid evidence chain', async () => {
+  const a = { 'X-Driftveil-Case': 'cccccccc-1111-2222-3333-444444444444' };
+  await rt('case.reset', {}, a); await rt('workflow.run', { procurement: { objective: 'preferred-vendor', preferredVendor: 'beacon', maxPremium: 0.5 } }, a);
+  const before = (await rt('state.get', {}, a)).data;
+  await (await import('../server/app.mjs')).closeStore();
+  const after = (await rt('state.get', {}, a)).data;
+  assert.deepEqual(after.records.map(r => r.hash), before.records.map(r => r.hash));
+  assert.equal(after.verified.valid, true, 'key order survives storage, so the hash chain still verifies');
 });

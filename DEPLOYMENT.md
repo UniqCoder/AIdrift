@@ -38,6 +38,19 @@ Render can build this image directly from a pushed Git repository. Configure a D
 
 Before publishing, push the current application source to a repository the connected account can write. Both currently connected GitHub accounts reported `push: false` for `xemorph64/exorcist` during this task. No source was pushed and no Render service was created from outdated remote code.
 
+## Data storage (Postgres)
+
+Runtime cases persist in Postgres when `DATABASE_URL` is set; otherwise in local JSON files, which Render wipes on every restart or redeploy. `GET /health` reports `"storage": "postgres"` or `"file"`.
+
+**Local:** `npm run db:up` starts the `DRIFTviel` container (`postgres:17-alpine`, volume `driftviel-data`, `127.0.0.1:5433`). Put `POSTGRES_PASSWORD` and `DATABASE_URL=postgres://driftveil:<password>@127.0.0.1:5433/driftveil` in the gitignored `.env`. Then run `DATABASE_URL=... npm run test:api` or `npm run start:api`.
+
+**Render:**
+1. Create a Render Postgres instance in the same region as `driftveil-api`. Free instances expire after 30 days.
+2. Copy its **Internal Database URL** into `driftveil-api` → Environment → `DATABASE_URL`, and save. Render redeploys.
+3. Check that `https://driftveil-api.onrender.com/health` shows `"storage":"postgres"`.
+
+The API creates the `runtime_cases` table on first use. States are stored as `json`, not `jsonb`, so key order and the evidence hash chain survive storage.
+
 ## Vercel
 
 After the Render service is live and its health and workflow endpoints pass checks, configure its actual URL:

@@ -13,7 +13,8 @@
     "start:api": "node server/index.mjs",
     "test:api": "node --test --test-isolation=none scripts/test-api.mjs",
     "test:runtime": "node --test --test-isolation=none scripts/test-runtime.mjs",
-    "samples": "node scripts/make-sample-pdfs.cjs"
+    "samples": "node scripts/make-sample-pdfs.cjs",
+    "db:up": "docker compose up -d --wait"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.3.0",
@@ -34,6 +35,7 @@
     "clsx": "^2.1.1",
     "lucide-react": "^1.59.0",
     "motion": "^14.3.0",
+    "pg": "^8.23.1",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "react-router-dom": "^7.18.4",
