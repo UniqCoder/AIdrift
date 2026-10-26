@@ -9,19 +9,32 @@ import os from 'node:os';
 import path from 'node:path';
 import { llmEnabled, llmModel, llmPlan } from './llm.mjs';
 
-// Runtime state persists as one JSON document, written atomically (temp file + rename).
+// Runtime state persists as one JSON document per case, written atomically (temp file + rename).
+// Each browser sends its own random X-Driftveil-Case key, so concurrent visitors never share or reset each other's case.
 // ponytail: single-process, serialized requests; move to SQLite if several API instances share state.
-const dataFile = () => path.join(process.env.DRIFTVEIL_DATA_DIR || path.join(import.meta.dirname, 'data'), 'runtime.json');
+const dataDir = () => process.env.DRIFTVEIL_DATA_DIR || path.join(import.meta.dirname, 'data');
+const MAX_CASES = 500;
+function caseFile(headers) {
+  const key = headers['x-driftveil-case'];
+  if (key === undefined) return path.join(dataDir(), 'runtime.json');
+  if (typeof key !== 'string' || !/^[a-z0-9-]{16,64}$/.test(key)) throw invalid('Invalid case key.');
+  return path.join(dataDir(), 'cases', `${key}.json`);
+}
 const adminToken = () => process.env.DRIFTVEIL_ADMIN_TOKEN || 'demo-admin';
-function loadState() {
-  try { return JSON.parse(fs.readFileSync(dataFile(), 'utf8')); }
+function loadState(file) {
+  try { return JSON.parse(fs.readFileSync(file, 'utf8')); }
   catch (error) { if (error.code !== 'ENOENT') throw error; return runtime.initialState(Date.now()); }
 }
-function saveState(state) {
-  fs.mkdirSync(path.dirname(dataFile()), { recursive: true });
-  const tmp = `${dataFile()}.${process.pid}.tmp`;
+function saveState(file, state) {
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  const tmp = `${file}.${process.pid}.tmp`;
   fs.writeFileSync(tmp, JSON.stringify(state));
-  fs.renameSync(tmp, dataFile());
+  fs.renameSync(tmp, file);
+  // ponytail: evict least recently written cases past MAX_CASES; an O(n) directory scan per write is fine at demo scale.
+  const dir = path.dirname(file);
+  if (path.basename(dir) !== 'cases') return;
+  const cases = fs.readdirSync(dir).filter(n => n.endsWith('.json')).map(n => ({ n, t: fs.statSync(path.join(dir, n)).mtimeMs }));
+  if (cases.length > MAX_CASES) cases.sort((a, b) => a.t - b.t).slice(0, cases.length - MAX_CASES).forEach(c => fs.rmSync(path.join(dir, c.n), { force: true }));
 }
 let queue = Promise.resolve();
 const serialized = task => (queue = queue.then(task, task));
@@ -31,7 +44,8 @@ export function runtimeRequest(op, body, headers = {}) {
     if (op === 'evaluation') return runtimeEvaluation.evaluateRuntime(`Node ${process.version}, ${os.platform()} ${os.arch()}, ${os.cpus()[0]?.model ?? 'unknown CPU'}`);
     const admin = typeof headers['x-driftveil-admin'] === 'string' && headers['x-driftveil-admin'].length === adminToken().length &&
       crypto.timingSafeEqual(Buffer.from(headers['x-driftveil-admin']), Buffer.from(adminToken()));
-    const state = loadState();
+    const file = caseFile(headers);
+    const state = loadState(file);
     const input = { ...body }; delete input.plan; delete input.text; delete input.sha256; // Never accepted from clients.
     let plan = null;
     if (op === 'document.ingest') {
@@ -52,7 +66,7 @@ export function runtimeRequest(op, body, headers = {}) {
     }
     delete input.agentMode;
     const { state: next, result } = runtime.handleRuntime(state, op, input, { now: Date.now(), admin, plan });
-    if (op !== 'state.get' && op !== 'evidence.export') saveState(next);
+    if (op !== 'state.get' && op !== 'evidence.export') saveState(file, next);
     return result;
   });
 }
@@ -137,7 +151,7 @@ export function createServer() {
     try {
       if (req.method === 'OPTIONS') {
         if (!cors['Access-Control-Allow-Origin']) return send(403, { error: 'Origin is not allowed.' });
-        res.writeHead(204, { ...cors, 'Access-Control-Allow-Methods': 'GET, POST, OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type, X-Driftveil-Admin' });
+        res.writeHead(204, { ...cors, 'Access-Control-Allow-Methods': 'GET, POST, OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type, X-Driftveil-Admin, X-Driftveil-Case' });
         return res.end();
       }
       const path = new URL(req.url, 'http://localhost').pathname;

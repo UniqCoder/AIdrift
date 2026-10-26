@@ -13,10 +13,19 @@ function loadLocal(): RuntimeState {
 function saveLocal(state: RuntimeState) {
   try { localStorage.setItem(KEY, JSON.stringify(state)); } catch { /* storage full or blocked: the in-memory result is still shown */ }
 }
+// One private case per browser on the shared API, so concurrent visitors cannot see or reset each other's runs.
+function caseKey() {
+  try {
+    const saved = localStorage.getItem("driftveil-runtime-case");
+    if (saved && /^[a-z0-9-]{16,64}$/.test(saved)) return saved;
+    const key = crypto.randomUUID(); localStorage.setItem("driftveil-runtime-case", key); return key;
+  } catch { return sessionKey; } // Storage blocked: private to this tab instead.
+}
+const sessionKey = typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : "";
 async function post<T>(op: string, body: unknown, headers: Record<string, string> = {}): Promise<T> {
   let response: Response;
   try {
-    response = await fetch(`${base}/runtime/${op}`, { method: "POST", headers: { "Content-Type": "application/json", ...headers }, body: JSON.stringify(body), signal: AbortSignal.timeout(90000) });
+    response = await fetch(`${base}/runtime/${op}`, { method: "POST", headers: { "Content-Type": "application/json", ...(caseKey() ? { "X-Driftveil-Case": caseKey() } : {}), ...headers }, body: JSON.stringify(body), signal: AbortSignal.timeout(90000) });
   } catch { throw new Error("The DRIFTVEIL API is unavailable or timed out. Nothing was recorded."); }
   const result = await response.json().catch(() => ({ error: `The API returned ${response.status}.` }));
   if (!response.ok) throw new Error(result.error || `The API returned ${response.status}.`);

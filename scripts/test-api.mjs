@@ -151,3 +151,18 @@ test('runtime API: real PDF upload, persisted cross-agent state, admin-only appr
   assert.deepEqual(exported.data.records, state.data.records);
   assert.equal((await rt('no.such.op')).status, 404);
 });
+
+test('runtime API: each case key gets an isolated case; reset in one never touches another', async () => {
+  const a = { 'X-Driftveil-Case': 'aaaaaaaa-1111-2222-3333-444444444444' };
+  const b = { 'X-Driftveil-Case': 'bbbbbbbb-1111-2222-3333-444444444444' };
+  await rt('workflow.run', {}, a);
+  assert.equal((await rt('state.get', {}, a)).data.ledger.length, 2);
+  assert.equal((await rt('state.get', {}, b)).data.ledger.length, 0, 'case B does not see case A');
+  await rt('workflow.run', {}, b); await rt('case.reset', {}, b);
+  assert.equal((await rt('state.get', {}, b)).data.ledger.length, 0);
+  assert.equal((await rt('state.get', {}, a)).data.ledger.length, 2, 'reset in B leaves A intact');
+  assert.equal((await rt('admin.approve', { agent: 'finance-agent', tool: 'payment.schedule', destination: 'finance.internal', taskFamily: 'standard', approvedBy: 'demo-admin' }, { ...a, 'X-Driftveil-Admin': 'test-admin-token' })).status, 200);
+  assert.equal((await rt('state.get', {}, b)).data.approvals.length, 0, 'approvals are per case');
+  assert.equal((await rt('state.get', {}, { 'X-Driftveil-Case': '../../etc/passwd' })).status, 400);
+  assert.ok(fs.existsSync(process.env.DRIFTVEIL_DATA_DIR + '/cases/aaaaaaaa-1111-2222-3333-444444444444.json'));
+});
