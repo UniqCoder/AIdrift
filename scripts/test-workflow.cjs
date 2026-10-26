@@ -40,13 +40,13 @@ module.exports = () => {
     assert.equal(render(Activity, '/activity').includes('Recent sessions'), false);
     assert.match(render(Incidents, '/incidents'), /No findings match/);
     const navigation = render(AppShell, '/demo');
-    assert.ok(navigation.includes('Security operations'));
-    assert.ok(navigation.includes('Task workspace'));
+    assert.ok(navigation.includes('>Runtime<') && navigation.includes('>Console<') && navigation.includes('>More<'));
     assert.equal(navigation.includes('Role Contracts'), false);
     assert.equal(navigation.includes('Explore illustrative workspace'), false);
     assert.equal(navigation.includes('<aside'), false);
     assert.match(navigation, /aria-label="Primary"/);
-    for (const route of ['/operations', '/activity', '/incidents', '/reports', '/demo', '/lab', '/settings']) assert.ok(navigation.includes(`href="${route}"`));
+    for (const route of ['/runtime', '/operations', '/reports']) assert.ok(navigation.includes(`href="${route}"`));
+    // Secondary routes (activity, findings, task workspace, lab, settings) live in the More menu, rendered on open.
     const id = useStore.getState().demo.id;
     const benign = runOutcome(useStore.getState().demo.input);
     const held = runOutcome(outcomeFixture());

@@ -1,14 +1,14 @@
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { Toaster } from "sonner";
-import { Bell, Command, FlaskConical, Moon, Pause, Play, Search, Sun } from "lucide-react";
+import { ChevronDown, Moon, Pause, Play, Search, Sun } from "lucide-react";
 import { NAV, ILLUSTRATIVE_NAV } from "./nav";
 import { useStore } from "@/store/useStore";
 import { cn } from "@/lib/utils";
 import { setBandThresholds } from "@/lib/risk";
 import { Button } from "../ui/button";
-import { Kbd, Skeleton } from "../ui/primitives";
-import { Tip, TooltipProvider } from "../ui/radix";
+import { Skeleton } from "../ui/primitives";
+import { Dropdown, Tip, TooltipProvider } from "../ui/radix";
 import { CommandPalette } from "./CommandPalette";
 import { Sigil } from "../Sigil";
 
@@ -16,36 +16,39 @@ export function BrandMark({ className }: { className?: string }) {
   return <Sigil className={className} />;
 }
 
+const PRIMARY = ["/runtime", "/operations", "/reports"];
+const SHORT: Record<string, string> = { "/runtime": "Runtime", "/operations": "Console", "/reports": "Reports" };
+
 function Topbar({ onSearch }: { onSearch: () => void }) {
   const loc = useLocation();
   const navigate = useNavigate();
   const settings = useStore(s => s.settings);
   const update = useStore(s => s.updateSettings);
-  const openIncidents = useStore(s => s.incidents.filter(i => i.computed && (i.status === "open" || i.status === "investigating")).length);
   const illustrative = ILLUSTRATIVE_NAV.some(g => g.items.some(i => loc.pathname.startsWith(i.to)));
+  const items = NAV.flatMap(group => group.items);
+  const more = items.filter(i => !PRIMARY.includes(i.to));
+  const moreActive = more.some(i => loc.pathname.startsWith(i.to));
 
-  return <header className="no-print sticky top-0 z-40 border-b border-border bg-bg/95 backdrop-blur-md">
-    <div className="mx-auto flex h-16 max-w-[1536px] items-center gap-3 px-4 md:px-8">
-      <Link to="/operations" className="mr-auto flex shrink-0 items-center gap-3" aria-label="DRIFTVEIL security operations">
-        <BrandMark className="size-8" />
-        <div className="leading-tight"><span className="block text-sm font-semibold tracking-[0.2em]">DRIFTVEIL</span><span className="mt-1 hidden text-xs text-muted sm:block">AI Agent Security</span></div>
+  return <header className="no-print sticky top-0 z-40 border-b border-border bg-bg/85 backdrop-blur-xl">
+    <div className="mx-auto flex h-16 max-w-[1536px] items-center gap-2 px-4 md:gap-4 md:px-8">
+      <Link to="/runtime" className="mr-2 flex shrink-0 items-center gap-3" aria-label="DRIFTVEIL agent runtime">
+        <BrandMark className="size-7" />
+        <span className="text-[13px] font-semibold tracking-[0.26em]">DRIFTVEIL</span>
       </Link>
-      <button onClick={onSearch} aria-label="Search" className="flex h-9 items-center gap-2 rounded-lg border border-border px-2.5 text-sm text-muted transition-colors hover:border-border-strong hover:text-fg sm:min-w-52">
-        <Search className="size-4" /><span className="hidden sm:inline">Search workspace</span><span className="ml-auto hidden items-center gap-1 pl-6 md:flex"><Kbd><Command className="inline size-3" /> K</Kbd></span>
-      </button>
-      <Tip content="Enterprise records and proposals are synthetic. Security decisions and mock effect checks execute.">
-        <span className="hidden items-center gap-2 rounded-full border border-border px-3 py-1.5 text-xs text-muted lg:inline-flex"><FlaskConical className="size-3.5 text-accent" />Synthetic environment</span>
-      </Tip>
-      {illustrative && <Button variant="ghost" onClick={() => update({ liveStream: !settings.liveStream })} aria-label="Toggle fixture stream" aria-pressed={settings.liveStream}>{settings.liveStream ? <Pause /> : <Play />}<span className="hidden sm:inline">Fixture stream</span></Button>}
-      <Tip content={`${openIncidents} open computed findings`}><Button variant="ghost" size="icon" onClick={() => navigate("/incidents?status=open")} aria-label="Open incidents" className="relative"><Bell />{openIncidents > 0 && <span className="absolute right-1 top-1 size-1.5 rounded-full bg-critical" />}</Button></Tip>
-      <Tip content={settings.theme === "dark" ? "Light theme" : "Dark theme"}><Button variant="ghost" size="icon" onClick={() => update({ theme: settings.theme === "dark" ? "light" : "dark" })} aria-label="Toggle theme">{settings.theme === "dark" ? <Sun /> : <Moon />}</Button></Tip>
-      <Link to="/settings" className="hidden size-9 shrink-0 place-items-center rounded-full border border-border bg-elevated text-xs font-semibold sm:grid" aria-label="Analyst settings">{settings.analystName.split(" ").map(w => w[0]).join("")}</Link>
+      <nav aria-label="Primary" className="flex min-w-0 items-center gap-1 overflow-x-auto [scrollbar-width:none]">
+        {items.filter(i => PRIMARY.includes(i.to)).map(item => <NavLink key={item.to} to={item.to} className={({ isActive }) => cn("shrink-0 rounded-full px-3.5 py-1.5 text-[15px] font-medium transition-colors", isActive ? "bg-elevated text-fg" : "text-muted hover:text-fg")}>{SHORT[item.to]}</NavLink>)}
+        <Dropdown align="start" trigger={<button className={cn("flex shrink-0 items-center gap-1 rounded-full px-3.5 py-1.5 text-[15px] font-medium transition-colors", moreActive ? "bg-elevated text-fg" : "text-muted hover:text-fg")}>More<ChevronDown className="size-3.5" /></button>}
+          items={more.map(i => ({ label: i.label, icon: <i.icon className="size-4" />, onSelect: () => navigate(i.to) }))} />
+      </nav>
+      <div className="ml-auto flex items-center gap-1">
+        <Tip content="Enterprise records and agent proposals are synthetic. Detection, policy and recovery logic execute for real.">
+          <span className="mr-2 hidden items-center gap-2 rounded-full border border-border px-3 py-1 text-xs text-muted lg:inline-flex"><span className="size-1.5 rounded-full bg-healthy" />Synthetic environment</span>
+        </Tip>
+        {illustrative && <Button variant="ghost" onClick={() => update({ liveStream: !settings.liveStream })} aria-label="Toggle fixture stream" aria-pressed={settings.liveStream}>{settings.liveStream ? <Pause /> : <Play />}</Button>}
+        <Tip content="Search (Ctrl K)"><Button variant="ghost" size="icon" onClick={onSearch} aria-label="Search"><Search /></Button></Tip>
+        <Tip content={settings.theme === "dark" ? "Light theme" : "Dark theme"}><Button variant="ghost" size="icon" onClick={() => update({ theme: settings.theme === "dark" ? "light" : "dark" })} aria-label="Toggle theme">{settings.theme === "dark" ? <Sun /> : <Moon />}</Button></Tip>
+      </div>
     </div>
-    <nav aria-label="Primary" className="mx-auto flex max-w-[1536px] gap-1 overflow-x-auto px-4 md:gap-3 md:px-8">
-      {NAV.flatMap(group => group.items).map(item => <NavLink key={item.to} to={item.to} className={({ isActive }) => cn("relative flex min-h-12 shrink-0 items-center gap-2 border-b-2 px-3 text-sm font-medium transition-colors", isActive ? "border-accent text-fg" : "border-transparent text-muted hover:border-border-strong hover:text-fg")}>
-        <item.icon className="size-4" strokeWidth={1.75} /><span>{item.label}</span>{item.to === "/incidents" && openIncidents > 0 && <span className="rounded bg-critical-soft px-1.5 text-xs text-critical">{openIncidents}</span>}
-      </NavLink>)}
-    </nav>
   </header>;
 }
 
@@ -81,7 +84,7 @@ export function AppShell() {
     <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-2 focus:z-[100] focus:rounded focus:bg-surface focus:p-3 focus:text-fg">Skip to content</a>
     <Topbar onSearch={() => setPaletteOpen(true)} />
     <main id="main-content" className="mx-auto w-full max-w-[1536px] px-4 py-7 md:px-8">
-      {ILLUSTRATIVE_NAV.some(g => g.items.some(i => loc.pathname.startsWith(i.to))) && <div className="mb-5 rounded-lg border border-warning/25 bg-warning-soft px-4 py-3 text-sm leading-relaxed text-muted">Illustrative records: these fleet charts and controls are fixtures. They do not configure or measure security operations. <Link to="/operations" className="text-accent hover:underline">Return to security operations →</Link></div>}
+      {ILLUSTRATIVE_NAV.some(g => g.items.some(i => loc.pathname.startsWith(i.to))) && <div className="mb-5 rounded-lg border border-warning/25 bg-warning-soft px-4 py-3 text-sm leading-relaxed text-muted">Illustrative records: these fleet charts and controls are fixtures. They do not configure or measure security operations. <Link to="/runtime" className="text-accent hover:underline">Return to the agent runtime →</Link></div>}
       <Suspense fallback={<PageFallback />}><Outlet /></Suspense>
     </main>
     <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} />

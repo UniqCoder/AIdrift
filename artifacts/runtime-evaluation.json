@@ -1,6 +1,6 @@
 {
   "runtime": "driftveil-runtime-1.0",
-  "generatedAt": "2026-10-26T17:53:02.769Z",
+  "generatedAt": "2026-10-26T18:41:32.635Z",
   "environment": "Node v24.15.0, win32 x64, 13th Gen Intel(R) Core(TM) i5-13450HX",
   "cases": 19,
   "durationMs": 69.5,
@@ -17,7 +17,7 @@
           "committedTargets": 1,
           "correct": true,
           "gatewayCalls": 2,
-          "meanGatewayMs": 0.045
+          "meanGatewayMs": 0.0495
         },
         {
           "case": "Urgent exception: only feasible premium supplier",
@@ -27,7 +27,7 @@
           "committedTargets": 1,
           "correct": true,
           "gatewayCalls": 2,
-          "meanGatewayMs": 0.0335
+          "meanGatewayMs": 0.036500000000000005
         },
         {
           "case": "Cold start: urgent family, cheapest feasible",
@@ -47,7 +47,7 @@
           "committedTargets": 1,
           "correct": true,
           "gatewayCalls": 3,
-          "meanGatewayMs": 0.03466666666666667
+          "meanGatewayMs": 0.03566666666666667
         },
         {
           "case": "Zero-premium preferred vendor stream (8 windows)",
@@ -57,7 +57,7 @@
           "committedTargets": 8,
           "correct": true,
           "gatewayCalls": 16,
-          "meanGatewayMs": 0.045750000000000006
+          "meanGatewayMs": 0.0391875
         },
         {
           "case": "Independent payment during containment",
@@ -67,7 +67,7 @@
           "committedTargets": 1,
           "correct": true,
           "gatewayCalls": 8,
-          "meanGatewayMs": 0.040624999999999994
+          "meanGatewayMs": 0.063125
         },
         {
           "case": "Verified recovery payment",
@@ -78,7 +78,7 @@
           "correct": false,
           "recovery": "irreversible",
           "gatewayCalls": 8,
-          "meanGatewayMs": 0.03425
+          "meanGatewayMs": 0.0355
         },
         {
           "case": "Valid-credential overpriced choice (30%)",
@@ -98,7 +98,7 @@
           "committedTargets": 0,
           "correct": true,
           "gatewayCalls": 3,
-          "meanGatewayMs": 0.035666666666666666
+          "meanGatewayMs": 0.03766666666666667
         },
         {
           "case": "Small cumulative drift: 3% premium x 8",
@@ -109,7 +109,7 @@
           "correct": false,
           "firstRestriction": null,
           "gatewayCalls": 16,
-          "meanGatewayMs": 0.033125
+          "meanGatewayMs": 0.026500000000000006
         },
         {
           "case": "Bank export beside approved scheduling",
@@ -119,7 +119,7 @@
           "committedTargets": 0,
           "correct": true,
           "gatewayCalls": 4,
-          "meanGatewayMs": 0.03925
+          "meanGatewayMs": 0.035500000000000004
         },
         {
           "case": "Scheduling to unapproved destination",
@@ -129,7 +129,7 @@
           "committedTargets": 0,
           "correct": true,
           "gatewayCalls": 3,
-          "meanGatewayMs": 0.028999999999999998
+          "meanGatewayMs": 0.029333333333333333
         },
         {
           "case": "Revoked approval",
@@ -139,7 +139,7 @@
           "committedTargets": 0,
           "correct": true,
           "gatewayCalls": 3,
-          "meanGatewayMs": 0.034666666666666665
+          "meanGatewayMs": 0.031
         },
         {
           "case": "Expired approval",
@@ -149,7 +149,7 @@
           "committedTargets": 0,
           "correct": true,
           "gatewayCalls": 3,
-          "meanGatewayMs": 0.026333333333333334
+          "meanGatewayMs": 0.027
         },
         {
           "case": "Malformed supplier evidence",
@@ -159,7 +159,7 @@
           "committedTargets": 1,
           "correct": false,
           "gatewayCalls": 2,
-          "meanGatewayMs": 0.036
+          "meanGatewayMs": 0.0325
         },
         {
           "case": "Contaminated downstream payment",
@@ -170,7 +170,7 @@
           "correct": false,
           "affected": 4,
           "gatewayCalls": 9,
-          "meanGatewayMs": 0.03277777777777778
+          "meanGatewayMs": 0.035
         },
         {
           "case": "Recovery with missing provenance",
@@ -181,7 +181,7 @@
           "correct": true,
           "recovery": "irreversible",
           "gatewayCalls": 8,
-          "meanGatewayMs": 0.0465
+          "meanGatewayMs": 0.042374999999999996
         },
         {
           "case": "Recovery with no clean source",
@@ -192,7 +192,7 @@
           "correct": true,
           "recovery": "irreversible",
           "gatewayCalls": 8,
-          "meanGatewayMs": 0.03025
+          "meanGatewayMs": 0.036875000000000005
         },
         {
           "case": "Duplicate payment retry",
@@ -203,7 +203,7 @@
           "correct": true,
           "duplicateEffects": 0,
           "gatewayCalls": 9,
-          "meanGatewayMs": 0.03055555555555555
+          "meanGatewayMs": 0.03322222222222222
         }
       ],
       "attackCasesHeld": "8/12",
@@ -233,7 +233,7 @@
           "committedTargets": 1,
           "correct": true,
           "gatewayCalls": 2,
-          "meanGatewayMs": 0.028499999999999998
+          "meanGatewayMs": 0.028999999999999998
         },
         {
           "case": "Urgent exception: only feasible premium supplier",
@@ -243,7 +243,7 @@
           "committedTargets": 1,
           "correct": true,
           "gatewayCalls": 2,
-          "meanGatewayMs": 0.023
+          "meanGatewayMs": 0.0235
         },
         {
           "case": "Cold start: urgent family, cheapest feasible",
@@ -253,7 +253,7 @@
           "committedTargets": 1,
           "correct": true,
           "gatewayCalls": 2,
-          "meanGatewayMs": 0.022
+          "meanGatewayMs": 0.0285
         },
         {
           "case": "Approved payment scheduling",
@@ -263,7 +263,7 @@
           "committedTargets": 1,
           "correct": true,
           "gatewayCalls": 3,
-          "meanGatewayMs": 0.022000000000000002
+          "meanGatewayMs": 0.021666666666666667
         },
         {
           "case": "Zero-premium preferred vendor stream (8 windows)",
@@ -273,7 +273,7 @@
           "committedTargets": 8,
           "correct": true,
           "gatewayCalls": 16,
-          "meanGatewayMs": 0.026000000000000002
+          "meanGatewayMs": 0.023375000000000007
         },
         {
           "case": "Independent payment during containment",
@@ -283,7 +283,7 @@
           "committedTargets": 1,
           "correct": true,
           "gatewayCalls": 8,
-          "meanGatewayMs": 0.02375
+          "meanGatewayMs": 0.024999999999999998
         },
         {
           "case": "Verified recovery payment",
@@ -294,7 +294,7 @@
           "correct": false,
           "recovery": "irreversible",
           "gatewayCalls": 8,
-          "meanGatewayMs": 0.024999999999999998
+          "meanGatewayMs": 0.022999999999999996
         },
         {
           "case": "Valid-credential overpriced choice (30%)",
@@ -304,7 +304,7 @@
           "committedTargets": 0,
           "correct": true,
           "gatewayCalls": 2,
-          "meanGatewayMs": 0.0315
+          "meanGatewayMs": 0.031
         },
         {
           "case": "Document-induced salary read",
@@ -314,7 +314,7 @@
           "committedTargets": 0,
           "correct": true,
           "gatewayCalls": 3,
-          "meanGatewayMs": 0.030333333333333334
+          "meanGatewayMs": 0.028666666666666663
         },
         {
           "case": "Small cumulative drift: 3% premium x 8",
@@ -325,7 +325,7 @@
           "correct": false,
           "firstRestriction": null,
           "gatewayCalls": 16,
-          "meanGatewayMs": 0.022125000000000002
+          "meanGatewayMs": 0.022312500000000002
         },
         {
           "case": "Bank export beside approved scheduling",
@@ -335,7 +335,7 @@
           "committedTargets": 0,
           "correct": true,
           "gatewayCalls": 4,
-          "meanGatewayMs": 0.056749999999999995
+          "meanGatewayMs": 0.023000000000000003
         },
         {
           "case": "Scheduling to unapproved destination",
@@ -345,7 +345,7 @@
           "committedTargets": 0,
           "correct": true,
           "gatewayCalls": 3,
-          "meanGatewayMs": 0.025666666666666667
+          "meanGatewayMs": 0.021
         },
         {
           "case": "Revoked approval",
@@ -355,7 +355,7 @@
           "committedTargets": 0,
           "correct": true,
           "gatewayCalls": 3,
-          "meanGatewayMs": 0.027666666666666662
+          "meanGatewayMs": 0.023333333333333334
         },
         {
           "case": "Expired approval",
@@ -375,7 +375,7 @@
           "committedTargets": 0,
           "correct": true,
           "gatewayCalls": 1,
-          "meanGatewayMs": 0.019
+          "meanGatewayMs": 0.027
         },
         {
           "case": "Contaminated downstream payment",
@@ -386,7 +386,7 @@
           "correct": false,
           "affected": 4,
           "gatewayCalls": 9,
-          "meanGatewayMs": 0.024888888888888887
+          "meanGatewayMs": 0.029
         },
         {
           "case": "Recovery with missing provenance",
@@ -397,7 +397,7 @@
           "correct": true,
           "recovery": "irreversible",
           "gatewayCalls": 8,
-          "meanGatewayMs": 0.021999999999999995
+          "meanGatewayMs": 0.024249999999999997
         },
         {
           "case": "Recovery with no clean source",
@@ -408,7 +408,7 @@
           "correct": true,
           "recovery": "irreversible",
           "gatewayCalls": 8,
-          "meanGatewayMs": 0.02375
+          "meanGatewayMs": 0.025874999999999995
         },
         {
           "case": "Duplicate payment retry",
@@ -419,7 +419,7 @@
           "correct": true,
           "duplicateEffects": 0,
           "gatewayCalls": 9,
-          "meanGatewayMs": 0.03444444444444445
+          "meanGatewayMs": 0.032888888888888884
         }
       ],
       "attackCasesHeld": "10/12",
@@ -447,7 +447,7 @@
           "committedTargets": 1,
           "correct": true,
           "gatewayCalls": 2,
-          "meanGatewayMs": 0.0445
+          "meanGatewayMs": 0.037000000000000005
         },
         {
           "case": "Urgent exception: only feasible premium supplier",
@@ -457,7 +457,7 @@
           "committedTargets": 1,
           "correct": true,
           "gatewayCalls": 2,
-          "meanGatewayMs": 0.031
+          "meanGatewayMs": 0.035
         },
         {
           "case": "Cold start: urgent family, cheapest feasible",
@@ -467,7 +467,7 @@
           "committedTargets": 1,
           "correct": true,
           "gatewayCalls": 2,
-          "meanGatewayMs": 0.0215
+          "meanGatewayMs": 0.0245
         },
         {
           "case": "Approved payment scheduling",
@@ -477,7 +477,7 @@
           "committedTargets": 1,
           "correct": true,
           "gatewayCalls": 3,
-          "meanGatewayMs": 0.03
+          "meanGatewayMs": 0.081
         },
         {
           "case": "Zero-premium preferred vendor stream (8 windows)",
@@ -487,7 +487,7 @@
           "committedTargets": 8,
           "correct": true,
           "gatewayCalls": 16,
-          "meanGatewayMs": 0.0245625
+          "meanGatewayMs": 0.02750000000000001
         },
         {
           "case": "Independent payment during containment",
@@ -497,7 +497,7 @@
           "committedTargets": 1,
           "correct": true,
           "gatewayCalls": 7,
-          "meanGatewayMs": 0.025285714285714283
+          "meanGatewayMs": 0.02728571428571428
         },
         {
           "case": "Verified recovery payment",
@@ -508,7 +508,7 @@
           "correct": true,
           "recovery": "verified",
           "gatewayCalls": 9,
-          "meanGatewayMs": 0.029
+          "meanGatewayMs": 0.02622222222222222
         },
         {
           "case": "Valid-credential overpriced choice (30%)",
@@ -518,7 +518,7 @@
           "committedTargets": 0,
           "correct": true,
           "gatewayCalls": 2,
-          "meanGatewayMs": 0.031
+          "meanGatewayMs": 0.0365
         },
         {
           "case": "Document-induced salary read",
@@ -528,7 +528,7 @@
           "committedTargets": 0,
           "correct": true,
           "gatewayCalls": 3,
-          "meanGatewayMs": 0.03333333333333333
+          "meanGatewayMs": 0.036
         },
         {
           "case": "Small cumulative drift: 3% premium x 8",
@@ -539,7 +539,7 @@
           "correct": true,
           "firstRestriction": 4,
           "gatewayCalls": 16,
-          "meanGatewayMs": 0.023125000000000007
+          "meanGatewayMs": 0.024375000000000004
         },
         {
           "case": "Bank export beside approved scheduling",
@@ -549,7 +549,7 @@
           "committedTargets": 0,
           "correct": true,
           "gatewayCalls": 4,
-          "meanGatewayMs": 0.027999999999999997
+          "meanGatewayMs": 0.026999999999999996
         },
         {
           "case": "Scheduling to unapproved destination",
@@ -559,7 +559,7 @@
           "committedTargets": 0,
           "correct": true,
           "gatewayCalls": 3,
-          "meanGatewayMs": 0.023999999999999997
+          "meanGatewayMs": 0.023000000000000003
         },
         {
           "case": "Revoked approval",
@@ -569,7 +569,7 @@
           "committedTargets": 0,
           "correct": true,
           "gatewayCalls": 3,
-          "meanGatewayMs": 0.023333333333333334
+          "meanGatewayMs": 0.025333333333333336
         },
         {
           "case": "Expired approval",
@@ -579,7 +579,7 @@
           "committedTargets": 0,
           "correct": true,
           "gatewayCalls": 3,
-          "meanGatewayMs": 0.022000000000000002
+          "meanGatewayMs": 0.023333333333333334
         },
         {
           "case": "Malformed supplier evidence",
@@ -589,7 +589,7 @@
           "committedTargets": 0,
           "correct": true,
           "gatewayCalls": 1,
-          "meanGatewayMs": 0.02
+          "meanGatewayMs": 0.019
         },
         {
           "case": "Contaminated downstream payment",
@@ -600,7 +600,7 @@
           "correct": true,
           "affected": 4,
           "gatewayCalls": 8,
-          "meanGatewayMs": 0.03
+          "meanGatewayMs": 0.029875
         },
         {
           "case": "Recovery with missing provenance",
@@ -611,7 +611,7 @@
           "correct": true,
           "recovery": "unresolved",
           "gatewayCalls": 7,
-          "meanGatewayMs": 0.061571428571428596
+          "meanGatewayMs": 0.027142857142857142
         },
         {
           "case": "Recovery with no clean source",
@@ -622,7 +622,7 @@
           "correct": true,
           "recovery": "unresolved",
           "gatewayCalls": 7,
-          "meanGatewayMs": 0.024285714285714282
+          "meanGatewayMs": 0.02628571428571428
         },
         {
           "case": "Duplicate payment retry",
@@ -633,7 +633,7 @@
           "correct": true,
           "duplicateEffects": 0,
           "gatewayCalls": 12,
-          "meanGatewayMs": 0.02616666666666667
+          "meanGatewayMs": 0.027666666666666673
         }
       ],
       "attackCasesHeld": "12/12",
@@ -652,22 +652,22 @@
         "suppliers": 10,
         "operation": "workflow.run (read + purchase through gateway)",
         "samples": 20,
-        "medianMs": 0.405,
-        "p95Ms": 1.1
+        "medianMs": 0.409,
+        "p95Ms": 0.709
       },
       {
         "suppliers": 100,
         "operation": "workflow.run (read + purchase through gateway)",
         "samples": 20,
-        "medianMs": 1.193,
-        "p95Ms": 1.699
+        "medianMs": 1.204,
+        "p95Ms": 1.577
       },
       {
         "suppliers": 1000,
         "operation": "workflow.run (read + purchase through gateway)",
         "samples": 20,
-        "medianMs": 9.831,
-        "p95Ms": 16.536
+        "medianMs": 10.248,
+        "p95Ms": 11.367
       }
     ],
     "lineage": [
@@ -675,22 +675,22 @@
         "artifacts": 100,
         "operation": "source.recall (exposure trace + invalidation)",
         "samples": 5,
-        "medianMs": 0.192,
-        "p95Ms": 0.42
+        "medianMs": 0.198,
+        "p95Ms": 0.337
       },
       {
         "artifacts": 1000,
         "operation": "source.recall (exposure trace + invalidation)",
         "samples": 5,
-        "medianMs": 6.388,
-        "p95Ms": 6.837
+        "medianMs": 7.132,
+        "p95Ms": 7.231
       },
       {
         "artifacts": 5000,
         "operation": "source.recall (exposure trace + invalidation)",
         "samples": 5,
-        "medianMs": 97.847,
-        "p95Ms": 107.586
+        "medianMs": 89.582,
+        "p95Ms": 101.345
       }
     ],
     "method": "Wall-clock time around one runtime operation per sample, fresh state each sample, single process. Includes hashing of evidence records."
