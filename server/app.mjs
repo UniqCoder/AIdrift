@@ -179,7 +179,7 @@ export function createServer() {
       }
       const path = new URL(req.url, 'http://localhost').pathname;
       if (req.method === 'GET' && ['/health', '/api/health'].includes(path)) return send(200, { status: 'ok', service: 'driftveil-api', engine: engine.ENGINE_VERSION, runtime: runtime.RUNTIME_VERSION, synthetic: true, usps: engine.PROOF_NAMES,
-        agent: llmEnabled() ? `llm:${llmModel()}` : runtime.LOCAL_AGENT, storage: storageKind(), adminAuth: process.env.DRIFTVEIL_ADMIN_TOKEN ? 'configured token' : 'demo token (not enterprise authentication)' });
+        agent: llmEnabled() ? `llm:${llmModel()}` : runtime.LOCAL_AGENT, storage: storageKind(), commit: process.env.RENDER_GIT_COMMIT?.slice(0, 7) ?? null, adminAuth: process.env.DRIFTVEIL_ADMIN_TOKEN ? 'configured token' : 'demo token (not enterprise authentication)' });
       const runtimeOp = path.match(/^\/api\/runtime\/([a-z.]+)$/)?.[1];
       if (runtimeOp) {
         if (![...runtime.RUNTIME_OPS, 'evaluation'].includes(runtimeOp)) return send(404, { error: 'Unknown runtime operation.' });

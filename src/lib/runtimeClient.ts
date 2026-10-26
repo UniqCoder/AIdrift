@@ -4,7 +4,7 @@ declare const __DRIFTVEIL_API_BASE__: string;
 const base = typeof __DRIFTVEIL_API_BASE__ === "string" ? __DRIFTVEIL_API_BASE__ : "";
 const KEY = "driftveil-runtime-v1";
 export const runtimeMode = base ? "api" : "local";
-export const runtimeLocation = base ? "Server API · persistent JSON store" : "Local browser · this browser's storage";
+export const runtimeLocation = base ? "Server API · persistent case store" : "Local browser · this browser's storage";
 
 function loadLocal(): RuntimeState {
   try { const s = JSON.parse(localStorage.getItem(KEY) ?? "null"); if (s?.version && Array.isArray(s.records)) return s; } catch { /* fall through to a fresh case */ }

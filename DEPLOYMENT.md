@@ -65,4 +65,4 @@ Deploy the project root on Vercel using the supplied Vite build/output settings.
 
 ## Current publication status
 
-The deployment files and seven HTTP/client integration tests are implemented. Public deployment is pending repository write access, confirmation of the Render workspace, and a working Vercel connection. The local Vercel CLI could not reach its API from this environment; the Vercel integration has been suggested but its connection has not been confirmed. Docker Desktop's Linux engine was unavailable when checked, so neither a local container build nor a registry push is claimed.
+Live (26 October 2026): Vercel frontend https://driftveil-five.vercel.app → Render Docker service https://driftveil-api.onrender.com, with `DATABASE_URL` set to Render Postgres (`/health` reports `"storage":"postgres"` and the running `commit`).
